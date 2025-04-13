@@ -1,20 +1,53 @@
 const TelegramBot = require('node-telegram-bot-api');
 const WebSocket = require('ws');
+
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require('cors');
+
+const app = express();
+const httpServer = http.createServer(app);
+app.use(cors());
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"]
+    }
+});
+httpServer.listen(2800, () => {
+    console.log("Http server is running");
+});
+
 const { MongoClient, ObjectId } = require('mongodb');
 const uniqid = require('uniqid');
 require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const wss = new WebSocket.Server({ port: process.env.PORT }, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
 const client = new MongoClient("mongodb://localhost:27017/");
 const users = client.db("admichat").collection("users");
 const messages = client.db("admichat").collection("messages");
 
-wss.on('connection', (ws) => {
-    console.log('Conection')
-    ws.on('close', () => wss.clients.delete(ws));
+let messageFromAdmin;
+io.on('connection', async (socket) => {
+    console.log("Conection via socket.io");
+    socket.on('admin-message', async (data) => {
+        const parsedData = JSON.parse(data);
+        messageFromAdmin = parsedData.message;
+        try {
+            await client.connect();
+            console.log("Database is connected");
+
+            messages.insertOne(messageFromAdmin);
+        } catch (error) {
+            console.log(error);
+        }
+        bot.sendMessage(parsedData.room, messageFromAdmin.text);
+    });
+
+    socket.on("join_room", async (roomId) => {
+        console.log(roomId);
+    })
 });
 
 bot.onText(/\/start/, async (msg) => {
@@ -28,13 +61,6 @@ bot.onText(/\/start/, async (msg) => {
         fname: msg.from.first_name,
     }
 
-    // const jsonUser = JSON.stringify(user)
-    // wss.clients.forEach(client => {
-    //     if (client.readyState === WebSocket.OPEN) {
-    //         client.send(jsonUser);
-    //     }
-    // });
-
     try {
         await client.connect();
         console.log("Database is connected");
@@ -46,21 +72,20 @@ bot.onText(/\/start/, async (msg) => {
     await bot.sendMessage(chatId, "Hi, this bot was created for technical support");   
 });
 
+
+
 bot.on('text', async (msg) => {
     const message = {
         _id: new ObjectId(),
-        fromId: msg.from.id,
-        from: msg.from.username || msg.from.first_name || 'Unknown user',
+        fromAdmin: false,
+        username: msg.from.username || msg.from.first_name || 'Unknown user',
         date: msg.date,
         text: msg.text,
     };
-
-    const jsonMessage = JSON.stringify(message);
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(jsonMessage);
-        }
-    });
+    
+    const roomId = msg.from.id;
+    const jsonMessage = JSON.stringify({message, roomId});
+    io.emit('user-message', jsonMessage);
 
     try {
         await client.connect();

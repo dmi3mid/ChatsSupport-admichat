@@ -1,34 +1,64 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { io } from 'socket.io-client';
 
 import Chat from '../components/Chats/Chat';
 import SendMsgForm from '../components/SendMsgForm';
 import MsgToMe from '../components/Messages/MsgToMe';
+import MsgFromMe from '../components/Messages/MsgFromMe';
 
 export default function ChatsPage() {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState({0:[]});
     const [chats, setChats] = useState([]);
+    const [room, setRoom] = useState(0);
+    const socketRef = useRef(null);
+
+
+    const goToChat = (roomId) => {
+        console.log(roomId);
+        setRoom(roomId);
+        socketRef.current.emit("join_room", roomId);
+        setMessages(prev => ({
+            ...prev,
+            [roomId]: prev[roomId] || []
+        }));
+    }
+
+
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:2800');
-      
-        socket.onopen = () => console.log('WebSocket підключено');
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            // console.log(data);
-            const message = data;
+        const socket = io('http://localhost:2800');
+        socketRef.current = socket;
+        
+        socket.on('user-message', (data) => {
+            console.log("Socketio", data);
+            const parsedData = JSON.parse(data);
             const newchat = {
-                id: data.fromId,
-                user: data.from,
-            }
-            setMessages(prev => [...prev, message]);
+                roomId: parsedData.roomId,
+                user: parsedData.message.username,
+            };
+            setMessages(prev => ({
+                ...prev,
+                [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
+            }));
+
             setChats(prev => {
-                if (prev.find(chat => chat.id === newchat.id)) return prev;
+                if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
                 return [...prev, newchat];
-              });
+            });
+        });
+        
+        return () => {
+            socket.disconnect();
         };
-        socket.onerror = (e) => console.error('Socket error:', e);
-      
-        return () => socket.close();
-      }, []);
+    }, []);
+
+
+    const getMessageFromAdmin = (message) => {
+        console.log(message);
+        socketRef.current.emit('admin-message', JSON.stringify({message, room}));
+        console.log('Надіслано через WebSocket:', message);
+    }
+
+
     return (
         <div className='bg-[#1b1b1b]'>
             <header className='flex justify-center items-center h-[50px]'>
@@ -37,18 +67,24 @@ export default function ChatsPage() {
             <main className='flex h-[calc(100vh-50px)]'>
                 <aside id='Chats' className='w-[20%] h-full bg-[#222222] mr-[3px]'>
                     {chats.map( (chat, idx) => (
-                        // <p key={idx} className='text-emerald-400'>{chat.user}</p>
-                        <Chat key={idx} id={chat.id} username={chat.user}/>
+                        <Chat key={idx} id={chat.roomId} username={chat.user} goToChat={goToChat}/>
                     ))}
                 </aside>
-                <div id='Chat' className='w-[80%] h-full flex flex-col'>
-                    <div className='flex flex-col h-full overflow-y-auto'>
-                        {messages.map((msg, idx) => (
-                            <MsgToMe key={idx} username={msg.from} text={msg.text}/>
-                        ))}
+                {(!messages[room] || messages[room].length === 0)
+                    ? <div className='w-[80%] h-full flex justify-center items-center'>
+                        <h2 className='text-[25px] font-[Ubuntu] font-[400] text-[#AAAAAA]'>Choose chat</h2>
                     </div>
-                    <SendMsgForm />
-                </div>
+                    : <div id='Chat' className='w-[80%] h-full flex flex-col'>
+                        <div className='flex flex-col h-full overflow-y-auto'>
+                            {messages[room].map((msg, idx) => (
+                                msg.fromAdmin
+                                ? <MsgFromMe key={idx} message={msg}/>
+                                : <MsgToMe key={idx} message={msg}/>
+                            ))}
+                        </div>
+                        <SendMsgForm messages={messages[room]} room={room} setMessages={setMessages} getMessageFromAdmin={getMessageFromAdmin}/>
+                    </div>
+                } 
             </main>
         </div>
     )
