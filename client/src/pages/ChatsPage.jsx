@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { io } from 'socket.io-client';
 
-import Chat from '../components/Chats/Chat';
+import Chat from '../components/Chat';
 import SendMsgForm from '../components/SendMsgForm';
-import MsgToMe from '../components/Messages/MsgToMe';
-import MsgFromMe from '../components/Messages/MsgFromMe';
+import MsgFromUser from '../components/Messages/MsgFromUser';
+import MsgFromAdmin from '../components/Messages/MsgFromAdmin';
 
 export default function ChatsPage() {
     const [messages, setMessages] = useState({0:[]});
@@ -78,8 +78,8 @@ export default function ChatsPage() {
                         <div className='flex flex-col h-full overflow-y-auto'>
                             {messages[room].map((msg, idx) => (
                                 msg.fromAdmin
-                                ? <MsgFromMe key={idx} message={msg}/>
-                                : <MsgToMe key={idx} message={msg}/>
+                                ? <MsgFromAdmin key={idx} message={msg}/>
+                                : <MsgFromUser key={idx} message={msg}/>
                             ))}
                         </div>
                         <SendMsgForm messages={messages[room]} room={room} setMessages={setMessages} getMessageFromAdmin={getMessageFromAdmin}/>

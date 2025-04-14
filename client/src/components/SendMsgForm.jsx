@@ -13,6 +13,7 @@ export default function SendMsgForm({messages, room, setMessages, getMessageFrom
     };
     const sendMessage = (ev) => {
         ev.preventDefault();
+        if (textMessage.trim() === "") return;
         setMessages(prev => ({
             ...prev,
             [room]: [...(prev[room] || []), message]
