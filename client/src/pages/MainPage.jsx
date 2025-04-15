@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavbarHeader from '../components/Navbar.header';
 import NavbarMain from '../components/Navbar.main';
