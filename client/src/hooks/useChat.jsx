@@ -5,11 +5,11 @@ export default function useChat() {
     const [messages, setMessages] = useState({0:[]});
     const [chats, setChats] = useState([]);
     const [room, setRoom] = useState(0);
+    const [repliedMessage, setRepliedMessage] = useState({});
     const socketRef = useRef(null);
 
 
     const goToChat = (roomId) => {
-        console.log(roomId);
         setRoom(roomId);
         socketRef.current.emit("join_room", roomId);
         setMessages(prev => ({
@@ -19,9 +19,15 @@ export default function useChat() {
     }
 
     const getMessageFromAdmin = (message) => {
-        console.log(message);
         socketRef.current.emit('admin-message', JSON.stringify({message, room}));
-        console.log('Надіслано через WebSocket:', message);
+    }
+
+    const getRepliedMessage = (message) => {
+        setRepliedMessage(message)
+    }
+
+    const cancelReplyMessage = () => {
+        setRepliedMessage("");
     }
 
     useEffect(() => {
@@ -29,11 +35,10 @@ export default function useChat() {
         socketRef.current = socket;
         
         socket.on('user-message', (data) => {
-            console.log("Socketio", data);
             const parsedData = JSON.parse(data);
             const newchat = {
                 roomId: parsedData.roomId,
-                user: parsedData.message.username,
+                username: parsedData.message.username,
             };
             setMessages(prev => ({
                 ...prev,
@@ -45,6 +50,14 @@ export default function useChat() {
                 return [...prev, newchat];
             });
         });
+
+        socket.on("updated-admin-message", (data) => {
+            const parsedData = JSON.parse(data);
+            setMessages(prev => ({
+                ...prev,
+                [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
+            }));
+        })
         
         return () => {
             socket.disconnect();
@@ -59,7 +72,11 @@ export default function useChat() {
         setChats,
         room,
         setRoom,
+        repliedMessage,
+        setRepliedMessage,
         goToChat,
         getMessageFromAdmin,
+        getRepliedMessage,
+        cancelReplyMessage,
     }
 }

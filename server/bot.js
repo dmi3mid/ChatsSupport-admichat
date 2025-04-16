@@ -34,15 +34,27 @@ io.on('connection', async (socket) => {
     socket.on('admin-message', async (data) => {
         const parsedData = JSON.parse(data);
         messageFromAdmin = parsedData.message;
+        const sentMsgFromAdmin = await bot.sendMessage(parsedData.room, messageFromAdmin.text, {
+            reply_to_message_id: messageFromAdmin?.repliedMessage?.message_id || null
+        });
+        messageFromAdmin.message_id = sentMsgFromAdmin.message_id;
+        messageFromAdmin.replied_message = {
+            from_admin: sentMsgFromAdmin?.reply_to_message?.from?.is_bot || false,
+            message_id: sentMsgFromAdmin?.reply_to_message?.message_id || 0,
+            username: sentMsgFromAdmin?.reply_to_message?.from.username || sentMsgFromAdmin?.reply_to_message?.from?.first_name || "Unknown user",
+            date: sentMsgFromAdmin?.reply_to_message?.date || 0,
+            text: sentMsgFromAdmin?.reply_to_message?.text || "",
+        };
+        const jsonMessage = JSON.stringify({message: messageFromAdmin, roomId: parsedData.room});
+        io.emit("updated-admin-message", jsonMessage);
         try {
             await client.connect();
             console.log("Database is connected");
-
+            delete messageFromAdmin.repliedMessage;
             messages.insertOne(messageFromAdmin);
         } catch (error) {
             console.log(error);
         }
-        bot.sendMessage(parsedData.room, messageFromAdmin.text);
     });
 
     socket.on("join_room", async (roomId) => {
@@ -57,8 +69,7 @@ bot.onText(/\/start/, async (msg) => {
     const user = {
         _id: msg.from.id,
         isMessage: false,
-        username: msg.from.username,
-        fname: msg.from.first_name,
+        username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
     }
 
     try {
@@ -77,10 +88,18 @@ bot.onText(/\/start/, async (msg) => {
 bot.on('text', async (msg) => {
     const message = {
         _id: new ObjectId(),
-        fromAdmin: false,
+        from_admin: false,
+        message_id: msg.message_id,
         username: msg.from.username || msg.from.first_name || 'Unknown user',
         date: msg.date,
         text: msg.text,
+        replied_message: {
+            from_admin: msg?.reply_to_message?.from?.is_bot || false,
+            message_id: msg?.reply_to_message?.message_id || 0,
+            username: msg?.reply_to_message?.from.username || msg?.reply_to_message?.from?.first_name || "Unknown user",
+            date: msg?.reply_to_message?.date || 0,
+            text: msg?.reply_to_message?.text || "",
+        },
     };
     
     const roomId = msg.from.id;

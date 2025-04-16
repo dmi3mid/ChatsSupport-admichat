@@ -3,27 +3,29 @@ import React, { useState } from 'react';
 import Input from './UI/Input';
 import Button from './UI/Button';
 
-export default function SendMsgForm({messages, room, setMessages, getMessageFromAdmin}) {
+export default function SendMsgForm({
+    getMessageFromAdmin, 
+    repliedMessage, 
+    setRepliedMessage
+}) {
     const [textMessage, setTextMessage] = useState('');
     const message = {
-        fromAdmin: true,
+        from_admin: true,
         username: "dmi3mid",
         date: Date.now(),
         text: textMessage,
+        repliedMessage,
     };
     const sendMessage = (ev) => {
         ev.preventDefault();
         if (textMessage.trim() === "") return;
-        setMessages(prev => ({
-            ...prev,
-            [room]: [...(prev[room] || []), message]
-        }));
+        setRepliedMessage({});
         getMessageFromAdmin(message);
         setTextMessage('');
     }
 
     return (
-        <form className='flex justify-center h-[40px] mb-[3px]' onSubmit={sendMessage}>
+        <form className='flex justify-center h-[40px]' onSubmit={sendMessage}>
             <Input 
                 placeholder="Type..." 
                 value={textMessage}

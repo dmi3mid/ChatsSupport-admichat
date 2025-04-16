@@ -1,10 +1,22 @@
 import React from 'react';
 
+import isEmptyObj from '../utils/isEmptyObj';
+
 import SendMsgForm from './SendMsgForm';
 import MsgFromUser from './Messages/MsgFromUser';
 import MsgFromAdmin from './Messages/MsgFromAdmin';
 
-export default function Chat({messages, room, setMessages, getMessageFromAdmin}) {
+
+export default function Chat({
+    messages, 
+    room, 
+    setMessages, 
+    getMessageFromAdmin, 
+    repliedMessage,
+    setRepliedMessage,
+    getRepliedMessage,
+    cancelReplyMessage
+}) {
     return (
         <>
             {(!messages[room] || messages[room].length === 0)
@@ -16,12 +28,31 @@ export default function Chat({messages, room, setMessages, getMessageFromAdmin})
                 : <div id='Chat' className='w-[80%] h-full flex flex-col'>
                     <div className='flex flex-col h-full overflow-y-auto'>
                         {messages[room].map((msg, idx) => (
-                            msg.fromAdmin
-                            ? <MsgFromAdmin key={idx} message={msg}/>
-                            : <MsgFromUser key={idx} message={msg}/>
+                            msg.from_admin
+                            ? <MsgFromAdmin key={idx} message={msg} getRepliedMessage={getRepliedMessage}/>
+                            : <MsgFromUser key={idx} message={msg} getRepliedMessage={getRepliedMessage}/>
                         ))}
                     </div>
-                    <SendMsgForm messages={messages[room]} room={room} setMessages={setMessages} getMessageFromAdmin={getMessageFromAdmin}/>
+                    <div className='mb-[3px]'>
+                        {(!isEmptyObj(repliedMessage))
+                            ? <div className='flex flex-col w-full bg-[#222222]'>
+                                <div className='flex justify-between pt-[10px] pb-[10px] pl-[20px] pr-[20px]'>
+                                    <h2 className='text-[15px] font-[Ubuntu] font-[500] text-[#AAAAAA]'>Reply on {repliedMessage.username}'s message</h2> 
+                                    <h2 onClick={cancelReplyMessage} className='text-[15px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70 duration-200 hover:opacity-100'>cancle</h2>
+                                </div>
+                                <p className='truncate pb-[10px] pl-[20px] pr-[20px] text-[13px] font-[Ubuntu] font-[350] text-[#AAAAAA]'>{repliedMessage.text}</p>
+                              </div>
+                            : <></>
+                        }
+                        <SendMsgForm 
+                            messages={messages[room]} 
+                            room={room} 
+                            setMessages={setMessages} 
+                            getMessageFromAdmin={getMessageFromAdmin} 
+                            repliedMessage={repliedMessage} 
+                            setRepliedMessage={setRepliedMessage}
+                        />
+                    </div>
                </div>
                 }
         </> 
