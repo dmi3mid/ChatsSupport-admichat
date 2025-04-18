@@ -34,16 +34,6 @@ export default function Chat({
                         ))}
                     </div>
                     <div className='mb-[3px]'>
-                        {(!isEmptyObj(repliedMessage))
-                            ? <div className='flex flex-col w-full bg-[#222222]'>
-                                <div className='flex justify-between pt-[10px] pb-[10px] pl-[20px] pr-[20px]'>
-                                    <h2 className='text-[15px] font-[Ubuntu] font-[500] text-[#AAAAAA]'>Reply on {repliedMessage.username}'s message</h2> 
-                                    <h2 onClick={cancelReplyMessage} className='text-[15px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70 duration-200 hover:opacity-100'>cancle</h2>
-                                </div>
-                                <p className='truncate pb-[10px] pl-[20px] pr-[20px] text-[13px] font-[Ubuntu] font-[350] text-[#AAAAAA]'>{repliedMessage.text}</p>
-                              </div>
-                            : <></>
-                        }
                         <SendMsgForm 
                             messages={messages[room]} 
                             room={room} 
@@ -51,6 +41,7 @@ export default function Chat({
                             getMessageFromAdmin={getMessageFromAdmin} 
                             repliedMessage={repliedMessage} 
                             setRepliedMessage={setRepliedMessage}
+                            cancelReplyMessage={cancelReplyMessage}
                         />
                     </div>
                </div>

@@ -32,12 +32,14 @@ let messageFromAdmin;
 io.on('connection', async (socket) => {
     console.log("Conection via socket.io");
     socket.on('admin-message', async (data) => {
-        const parsedData = JSON.parse(data);
+        const parsedData = JSON.parse(data); // message and room
         messageFromAdmin = parsedData.message;
         const sentMsgFromAdmin = await bot.sendMessage(parsedData.room, messageFromAdmin.text, {
-            reply_to_message_id: messageFromAdmin?.repliedMessage?.message_id || null
+            reply_to_message_id: messageFromAdmin?.replied_message?.message_id || null
         });
         messageFromAdmin.message_id = sentMsgFromAdmin.message_id;
+        messageFromAdmin.room_id = sentMsgFromAdmin.chat.id;
+        delete messageFromAdmin.replied_message;
         messageFromAdmin.replied_message = {
             from_admin: sentMsgFromAdmin?.reply_to_message?.from?.is_bot || false,
             message_id: sentMsgFromAdmin?.reply_to_message?.message_id || 0,
@@ -62,13 +64,33 @@ io.on('connection', async (socket) => {
     })
 });
 
+app.get('/getUsers', async (req, res) => {
+    try {
+        const usersData = await users.find({}).toArray();
+        res.send(JSON.stringify(usersData));
+    }
+    catch (error) {
+        console.log(error);
+    }
+
+});
+app.get('/getMessages', async (req, res) => {
+    try {
+        const messagesData = await messages.find({}).limit(30).toArray();
+        res.send(JSON.stringify(messagesData));
+    }
+    catch (error) {
+        console.log(error)
+    }
+})
+
+
 bot.onText(/\/start/, async (msg) => {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
 
     const user = {
         _id: msg.from.id,
-        isMessage: false,
         username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
     }
 
@@ -84,10 +106,10 @@ bot.onText(/\/start/, async (msg) => {
 });
 
 
-
 bot.on('text', async (msg) => {
     const message = {
         _id: new ObjectId(),
+        room_id: msg.from.id,
         from_admin: false,
         message_id: msg.message_id,
         username: msg.from.username || msg.from.first_name || 'Unknown user',
