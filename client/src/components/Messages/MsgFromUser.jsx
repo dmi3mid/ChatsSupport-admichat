@@ -5,6 +5,7 @@ export default function MsgFromUser({
   getRepliedMessage
 }) {
   const sendRepliedMessage = () => {
+    console.log(message);
     getRepliedMessage(message)
   }
 

@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import { io } from 'socket.io-client';
+import axios from 'axios';
 
 export default function useChat() {
     const [messages, setMessages] = useState({0:[]});
@@ -64,6 +65,37 @@ export default function useChat() {
         };
     }, []);
 
+    useEffect(() => {
+        const getUsers = async () => {
+            const response = await axios.get('http://localhost:2800/getUsers');
+            const usersData = response.data;
+            // console.log(usersData);
+            usersData.forEach((user) => {
+                const newchat = {
+                    roomId: user._id,
+                    username: user.username,
+                }
+                setChats(prev => {
+                    if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
+                    return [...prev, newchat];
+                });
+            })
+        }
+        const getMessages = async () => {
+            const response = await axios.get('http://localhost:2800/getMessages');
+            const messagesData = response.data;
+            // console.log(messagesData);
+            messagesData.forEach((message) => {
+                setMessages(prev => ({
+                    ...prev,
+                    [message.room_id]: [...(prev[message.room_id] || []), message]
+                }));
+            })
+        }
+    
+        getUsers();
+        getMessages();
+    }, [])
 
     return {
         messages,
