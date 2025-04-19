@@ -1,7 +1,5 @@
 import React from 'react';
 
-import isEmptyObj from '../utils/isEmptyObj';
-
 import SendMsgForm from './SendMsgForm';
 import MsgFromUser from './Messages/MsgFromUser';
 import MsgFromAdmin from './Messages/MsgFromAdmin';
@@ -11,11 +9,17 @@ export default function Chat({
     messages, 
     room, 
     setMessages, 
+
     getMessageFromAdmin, 
     repliedMessage,
     setRepliedMessage,
     getRepliedMessage,
-    cancelReplyMessage
+    cancelReplyMessage,
+    contextMenuOpen,
+    contextMenuClose,
+    position,
+    menuVisibility,
+    getCtxMenuMsg
 }) {
     return (
         <>
@@ -29,8 +33,24 @@ export default function Chat({
                     <div className='flex flex-col h-full overflow-y-auto'>
                         {messages[room].map((msg, idx) => (
                             msg.from_admin
-                            ? <MsgFromAdmin key={idx} message={msg} getRepliedMessage={getRepliedMessage}/>
-                            : <MsgFromUser key={idx} message={msg} getRepliedMessage={getRepliedMessage}/>
+                            ? <MsgFromAdmin key={idx} 
+                                message={msg} 
+                                getRepliedMessage={getRepliedMessage}
+                                contextMenuOpen={contextMenuOpen}
+                                contextMenuClose={contextMenuClose}
+                                position={position}
+                                menuVisibility={menuVisibility}  
+                                getCtxMenuMsg={getCtxMenuMsg}
+                            />
+                            : <MsgFromUser key={idx} 
+                                message={msg} 
+                                getRepliedMessage={getRepliedMessage}
+                                contextMenuOpen={contextMenuOpen}
+                                contextMenuClose={contextMenuClose}
+                                position={position}
+                                menuVisibility={menuVisibility}  
+                                getCtxMenuMsg={getCtxMenuMsg}
+                            />
                         ))}
                     </div>
                     <div className='mb-[3px]'>
@@ -38,6 +58,7 @@ export default function Chat({
                             messages={messages[room]} 
                             room={room} 
                             setMessages={setMessages} 
+
                             getMessageFromAdmin={getMessageFromAdmin} 
                             repliedMessage={repliedMessage} 
                             setRepliedMessage={setRepliedMessage}

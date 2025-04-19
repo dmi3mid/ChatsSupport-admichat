@@ -7,7 +7,10 @@ export default function useChat() {
     const [chats, setChats] = useState([]);
     const [room, setRoom] = useState(0);
     const [repliedMessage, setRepliedMessage] = useState({});
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+
     const socketRef = useRef(null);
+    const menuVisibilityRef = useRef(false);
 
 
     const goToChat = (roomId) => {
@@ -29,6 +32,26 @@ export default function useChat() {
 
     const cancelReplyMessage = () => {
         setRepliedMessage("");
+    }
+
+    const contextMenuOpen = (ev) => {
+        ev.preventDefault();
+        menuVisibilityRef.current = false;
+        menuVisibilityRef.current = true;
+        setPosition({
+            x: ev.clientX,
+            y: ev.clientY, 
+        });
+    }
+    const getCtxMenuMsg = (message) => {
+        console.log(message);
+    }
+    const contextMenuClose = () => {
+        menuVisibilityRef.current = false;
+        setPosition({
+            x: 0,
+            y: 0, 
+        });
     }
 
     useEffect(() => {
@@ -98,17 +121,20 @@ export default function useChat() {
     }, [])
 
     return {
-        messages,
-        setMessages,
-        chats,
-        setChats,
-        room,
-        setRoom,
-        repliedMessage,
-        setRepliedMessage,
+        messages, setMessages,
+        chats, setChats,
+        room, setRoom,
+        repliedMessage, setRepliedMessage,
+        menuVisibility: menuVisibilityRef.current,
+        position, setPosition,
         goToChat,
         getMessageFromAdmin,
         getRepliedMessage,
         cancelReplyMessage,
+        contextMenuOpen,
+        contextMenuClose,
+        getCtxMenuMsg,
+
+        socket: socketRef.current,
     }
 }

@@ -8,18 +8,19 @@ import Chat from '../components/Chat';
 
 export default function ChatsPage() {
     const {
-        messages,
-        setMessages,
-        chats,
-        setChats,
-        room,
-        setRoom,
-        repliedMessage,
-        setRepliedMessage,
+        messages, setMessages,
+        chats, setChats,
+        room, setRoom,
         goToChat,
+        repliedMessage, setRepliedMessage,
+        position, setPosition,
+        menuVisibility,
         getMessageFromAdmin,
         getRepliedMessage,
         cancelReplyMessage,
+        contextMenuOpen,
+        contextMenuClose,
+        getCtxMenuMsg
     } = useChat();
 
     return (
@@ -39,11 +40,17 @@ export default function ChatsPage() {
                     messages={messages} 
                     room={room} 
                     setMessages={setMessages} 
+
                     getMessageFromAdmin={getMessageFromAdmin}
                     repliedMessage={repliedMessage}
                     setRepliedMessage={setRepliedMessage}
                     getRepliedMessage={getRepliedMessage}
                     cancelReplyMessage={cancelReplyMessage}
+                    contextMenuOpen={contextMenuOpen}
+                    contextMenuClose={contextMenuClose}
+                    position={position}
+                    menuVisibility={menuVisibility}
+                    getCtxMenuMsg={getCtxMenuMsg}
                 />
             </main>
         </div>
