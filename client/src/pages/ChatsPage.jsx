@@ -39,7 +39,6 @@ export default function ChatsPage() {
                 <Chat 
                     messages={messages} 
                     room={room} 
-                    setMessages={setMessages} 
 
                     getMessageFromAdmin={getMessageFromAdmin}
                     repliedMessage={repliedMessage}

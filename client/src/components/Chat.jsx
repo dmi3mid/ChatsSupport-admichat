@@ -8,7 +8,6 @@ import MsgFromAdmin from './Messages/MsgFromAdmin';
 export default function Chat({
     messages, 
     room, 
-    setMessages, 
 
     getMessageFromAdmin, 
     repliedMessage,
@@ -57,7 +56,6 @@ export default function Chat({
                         <SendMsgForm 
                             messages={messages[room]} 
                             room={room} 
-                            setMessages={setMessages} 
 
                             getMessageFromAdmin={getMessageFromAdmin} 
                             repliedMessage={repliedMessage} 
