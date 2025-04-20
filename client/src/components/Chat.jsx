@@ -17,6 +17,9 @@ export default function Chat({
 
     position, setPosition,
     contextMenu, setContextMenu,
+
+    edidingMessage, setEditingMessage,
+    editMessage,
 }) {
     return (
         <>
@@ -39,6 +42,10 @@ export default function Chat({
                                 setPosition={setPosition}
                                 contextMenu={contextMenu} 
                                 setContextMenu={setContextMenu}
+
+                                edidingMessage={edidingMessage} 
+                                setEditingMessage={setEditingMessage}
+                                editMessage={editMessage}
                             />
                             : <MsgFromUser key={idx} 
                                 message={msg} 
@@ -49,6 +56,10 @@ export default function Chat({
                                 setPosition={setPosition}
                                 contextMenu={contextMenu} 
                                 setContextMenu={setContextMenu} 
+
+                                edidingMessage={edidingMessage} 
+                                setEditingMessage={setEditingMessage}
+                                editMessage={editMessage}
                             />
                         ))}
                     </div>

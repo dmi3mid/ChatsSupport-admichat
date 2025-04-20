@@ -8,9 +8,11 @@ export default function useChat() {
     const [room, setRoom] = useState(0);
 
     const [repliedMessage, setRepliedMessage] = useState({});
-    
+
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [contextMenu, setContextMenu] = useState(0);
+
+    const [edidingMessage, setEditingMessage] = useState(0);
 
     const socketRef = useRef(null);
 
@@ -36,6 +38,9 @@ export default function useChat() {
         setRepliedMessage("");
     }
 
+    const editMessage = (message) => {
+        console.log(message);
+    }
 
     useEffect(() => {
         const getUsers = async () => {
@@ -138,5 +143,8 @@ export default function useChat() {
 
         contextMenu, setContextMenu,
         position, setPosition,
+
+        edidingMessage, setEditingMessage,
+        editMessage,
     }
 }

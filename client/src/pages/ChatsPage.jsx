@@ -21,6 +21,9 @@ export default function ChatsPage() {
 
         contextMenu, setContextMenu,
         position, setPosition,
+
+        edidingMessage, setEditingMessage,
+        editMessage,
     } = useChat();
 
     return (
@@ -46,11 +49,15 @@ export default function ChatsPage() {
                     setRepliedMessage={setRepliedMessage}
                     getRepliedMessage={getRepliedMessage}
                     cancelReplyMessage={cancelReplyMessage}
-                    
+
                     position={position}
                     setPosition={setPosition}
                     contextMenu={contextMenu} 
                     setContextMenu={setContextMenu}
+
+                    edidingMessage={edidingMessage} 
+                    setEditingMessage={setEditingMessage}
+                    editMessage={editMessage}
                 />
             </main>
         </div>

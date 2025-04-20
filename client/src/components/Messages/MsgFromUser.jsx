@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Pencil, Trash2 } from 'lucide-react';
 
+import Input from '../UI/Input';
+
 export default function MsgFromUser({
   message,
 
@@ -8,6 +10,9 @@ export default function MsgFromUser({
 
   position, setPosition,
   contextMenu, setContextMenu,
+
+  edidingMessage, setEditingMessage,
+  editMessage,
 }) {
   const onReplyToMessage = () => {
     getRepliedMessage(message);
@@ -17,14 +22,25 @@ export default function MsgFromUser({
     setContextMenu(0);
     setContextMenu(message.message_id);
     setPosition({
-        x: ev.clientX,
-        y: ev.clientY, 
+      x: ev.clientX,
+      y: ev.clientY,
     });
   }
   const contextMenuClose = () => {
     setContextMenu(0);
   }
   const isContextMenu = message.message_id === contextMenu;
+
+  const onEditMessage = () => {
+    setContextMenu(0);
+    setEditingMessage(message.message_id);
+    editMessage(message);
+  }
+  const edit = (ev) => {
+    ev.preventDefault();
+    setEditingMessage(0);
+  }
+  const isEditing = message.message_id === edidingMessage;
   return (
     <div onContextMenu={contextMenuOpen} className='w-[300px] p-[10px] mb-[10px] rounded-tl-[15px] rounded-tr-[15px] rounded-br-[15px] break-words inline-block bg-[#222222]'>
       <header className='flex justify-between items-center'>
@@ -45,13 +61,13 @@ export default function MsgFromUser({
           </p>
         </div>
       }
-      {(isContextMenu)
-        ? <div className={`flex flex-col justify-evenly absolute z-10 w-[180px] h-[110px] p-[15px] rounded-[15px] bg-[#202020]`} style={{ left: `${position.x}px`, top: `${position.y - 100}px` }}>
+      {isContextMenu && (
+        <div className={`flex flex-col justify-evenly absolute z-10 w-[180px] h-[110px] p-[15px] rounded-[15px] bg-[#202020]`} style={{ left: `${position.x}px`, top: `${position.y - 100}px` }}>
           <p onClick={contextMenuClose} className='flex justify-start items-center text-[15px] font-[Ubuntu] font-[400] text-[#AAAAAA] rounded-[10px] hover:bg-[#272727]'>
             <X height={15} />
             Close
           </p>
-          <p className='flex justify-start items-center text-[15px] font-[Ubuntu] font-[400] text-[#AAAAAA] rounded-[10px] hover:bg-[#272727]'>
+          <p onClick={onEditMessage} className='flex justify-start items-center text-[15px] font-[Ubuntu] font-[400] text-[#AAAAAA] rounded-[10px] hover:bg-[#272727]'>
             <Pencil height={15} />
             Edit message
           </p>
@@ -60,8 +76,16 @@ export default function MsgFromUser({
             Delete message
           </p>
         </div>
-        : <></>
-      }
+      )}
+      {isEditing && (
+        <form onSubmit={edit} className="flex justify-center pt-[5px] h-[30px]">
+          <Input
+            placeholder={message.text}
+            className="w-[90%] text-[20px] text-[#AAAAAA] font-[Ubuntu] font-[500] bg-[#292929]"
+          />
+
+        </form>
+      )}
     </div>
   )
 }
