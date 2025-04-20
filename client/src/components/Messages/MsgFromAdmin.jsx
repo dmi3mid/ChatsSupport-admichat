@@ -17,6 +17,7 @@ export default function MsgFromAdmin({
   const onReplyToMessage = () => {
     getRepliedMessage(message);
   }
+  
   const contextMenuOpen = (ev) => {
     ev.preventDefault();
     setContextMenu(0);
@@ -36,8 +37,11 @@ export default function MsgFromAdmin({
     setEditingMessage(message.message_id);
     editMessage(message);
   }
-  const edit = (ev) => {
+  const editing = (ev) => {
     ev.preventDefault();
+    setEditingMessage(0);
+  }
+  const cancelEditing = () => {
     setEditingMessage(0);
   }
   const isEditing = message.message_id === edidingMessage;
@@ -78,12 +82,14 @@ export default function MsgFromAdmin({
         </div>
       )}
       {isEditing && (
-        <form onSubmit={edit} className="flex justify-center pt-[5px] h-[30px]">
+        <form onSubmit={editing} className="flex justify-between items-center pt-[5px] h-[30px]">
           <Input
             placeholder={message.text}
-            className="w-[90%] text-[20px] text-[#AAAAAA] font-[Ubuntu] font-[500] bg-[#003834]"
+            className="w-[90%] rounded-[5px] text-[15px] text-[#AAAAAA] font-[Ubuntu] font-[500] bg-[#003834]"
           />
-
+          <p onClick={cancelEditing} className='flex justify-center items-center w-[25px] h-[25px] rounded-[5px] font-[Ubuntu] font-[400] text-[#AAAAAA] hover:bg-[#003834]'>
+            <X height={30} />
+          </p>
         </form>
       )}
     </div>
