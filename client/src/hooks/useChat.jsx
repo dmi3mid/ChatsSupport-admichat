@@ -3,24 +3,21 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 
 export default function useChat() {
-    const [messages, setMessages] = useState({0:[]});
     const [chats, setChats] = useState([]);
+    const [messages, setMessages] = useState({0:[]});
     const [room, setRoom] = useState(0);
+
     const [repliedMessage, setRepliedMessage] = useState({});
+    
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [contextMenu, setContextMenu] = useState(0);
 
     const socketRef = useRef(null);
-    const messagesRef = useRef({0:[]});
-    const menuVisibilityRef = useRef(false);
 
 
     const goToChat = (roomId) => {
         setRoom(roomId);
         socketRef.current.emit('join_room', roomId);
-        // messagesRef.current = {
-        //     ...messagesRef.current,
-        //     [roomId]: messagesRef.current[roomId] || []
-        // };
         setMessages(prev => ({
             ...prev,
             [roomId]: prev[roomId] || []
@@ -37,26 +34,6 @@ export default function useChat() {
 
     const cancelReplyMessage = () => {
         setRepliedMessage("");
-    }
-
-    const contextMenuOpen = (ev) => {
-        ev.preventDefault();
-        menuVisibilityRef.current = false;
-        menuVisibilityRef.current = true;
-        setPosition({
-            x: ev.clientX,
-            y: ev.clientY, 
-        });
-    }
-    const getCtxMenuMsg = (message) => {
-        console.log(message);
-    }
-    const contextMenuClose = () => {
-        menuVisibilityRef.current = false;
-        setPosition({
-            x: 0,
-            y: 0, 
-        });
     }
 
 
@@ -81,13 +58,6 @@ export default function useChat() {
             const messagesData = response.data;
             // console.log(messagesData);
             messagesData.forEach((message) => {
-                // messagesRef.current = {
-                //     ...messagesRef.current,
-                //     [message.room_id]: [
-                //         ...(messagesRef.current[message.room_id] || []),
-                //         message
-                //     ]
-                // };
                 setMessages(prev => ({
                     ...prev,
                     [message.room_id]: [...(prev[message.room_id] || []), message]
@@ -111,13 +81,6 @@ export default function useChat() {
                 roomId: parsedData.roomId,
                 username: parsedData.message.username,
             };
-            // messagesRef.current = {
-            //     ...messagesRef.current,
-            //     [parsedData.message.roomId]: [
-            //         ...(messagesRef.current[parsedData.roomId] || []),
-            //         parsedData.message
-            //     ]
-            // };
             setMessages(prev => ({
                 ...prev,
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
@@ -131,13 +94,6 @@ export default function useChat() {
 
         socket.on('updated-admin-message', (data) => {
             const parsedData = JSON.parse(data);
-            // messagesRef.current = {
-            //     ...messagesRef.current,
-            //     [parsedData.message.roomId]: [
-            //         ...(messagesRef.current[parsedData.roomId] || []),
-            //         parsedData.message
-            //     ]
-            // };
             setMessages(prev => ({
                 ...prev,
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
@@ -148,7 +104,7 @@ export default function useChat() {
         return () => {
             socket.disconnect();
         };
-    }, [messagesRef]);
+    }, []);
 
     useEffect(() => {
         socketRef.current.on('edit-msg-from-bot',  async (data) => {
@@ -169,20 +125,18 @@ export default function useChat() {
     }, []);
 
     return {
-        messages, setMessages,
         chats, setChats,
+        messages, setMessages,
         room, setRoom,
-        repliedMessage, setRepliedMessage,
-        menuVisibility: menuVisibilityRef.current,
-        position, setPosition,
         goToChat,
+
         getMessageFromAdmin,
+
+        repliedMessage, setRepliedMessage,
         getRepliedMessage,
         cancelReplyMessage,
-        contextMenuOpen,
-        contextMenuClose,
-        getCtxMenuMsg,
 
-        socket: socketRef.current,
+        contextMenu, setContextMenu,
+        position, setPosition,
     }
 }

@@ -6,10 +6,9 @@ import Button from './UI/Button';
 import isEmptyObj from '../utils/isEmptyObj';
 
 export default function SendMsgForm({
+    repliedMessage, setRepliedMessage,
     getMessageFromAdmin,
-    repliedMessage,
-    setRepliedMessage,
-    cancelReplyMessage
+    cancelReplyMessage,
 }) {
     const [textMessage, setTextMessage] = useState('');
     const message = {

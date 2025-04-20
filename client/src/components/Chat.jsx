@@ -10,15 +10,13 @@ export default function Chat({
     room, 
 
     getMessageFromAdmin, 
-    repliedMessage,
-    setRepliedMessage,
+
+    repliedMessage, setRepliedMessage,
     getRepliedMessage,
     cancelReplyMessage,
-    contextMenuOpen,
-    contextMenuClose,
-    position,
-    menuVisibility,
-    getCtxMenuMsg
+
+    position, setPosition,
+    contextMenu, setContextMenu,
 }) {
     return (
         <>
@@ -34,21 +32,23 @@ export default function Chat({
                             msg.from_admin
                             ? <MsgFromAdmin key={idx} 
                                 message={msg} 
+
                                 getRepliedMessage={getRepliedMessage}
-                                contextMenuOpen={contextMenuOpen}
-                                contextMenuClose={contextMenuClose}
+
                                 position={position}
-                                menuVisibility={menuVisibility}  
-                                getCtxMenuMsg={getCtxMenuMsg}
+                                setPosition={setPosition}
+                                contextMenu={contextMenu} 
+                                setContextMenu={setContextMenu}
                             />
                             : <MsgFromUser key={idx} 
                                 message={msg} 
+
                                 getRepliedMessage={getRepliedMessage}
-                                contextMenuOpen={contextMenuOpen}
-                                contextMenuClose={contextMenuClose}
+
                                 position={position}
-                                menuVisibility={menuVisibility}  
-                                getCtxMenuMsg={getCtxMenuMsg}
+                                setPosition={setPosition}
+                                contextMenu={contextMenu} 
+                                setContextMenu={setContextMenu} 
                             />
                         ))}
                     </div>
@@ -57,9 +57,9 @@ export default function Chat({
                             messages={messages[room]} 
                             room={room} 
 
-                            getMessageFromAdmin={getMessageFromAdmin} 
                             repliedMessage={repliedMessage} 
                             setRepliedMessage={setRepliedMessage}
+                            getMessageFromAdmin={getMessageFromAdmin} 
                             cancelReplyMessage={cancelReplyMessage}
                         />
                     </div>

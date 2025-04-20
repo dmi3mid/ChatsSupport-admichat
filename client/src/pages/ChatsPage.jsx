@@ -8,19 +8,19 @@ import Chat from '../components/Chat';
 
 export default function ChatsPage() {
     const {
-        messages, setMessages,
         chats, setChats,
+        messages, setMessages,
         room, setRoom,
         goToChat,
-        repliedMessage, setRepliedMessage,
-        position, setPosition,
-        menuVisibility,
+
         getMessageFromAdmin,
+
+        repliedMessage, setRepliedMessage,
         getRepliedMessage,
         cancelReplyMessage,
-        contextMenuOpen,
-        contextMenuClose,
-        getCtxMenuMsg
+
+        contextMenu, setContextMenu,
+        position, setPosition,
     } = useChat();
 
     return (
@@ -31,8 +31,8 @@ export default function ChatsPage() {
             <main className='flex h-[calc(100vh-50px)]'>
                 <aside id='Chats' className='w-[20%] h-full bg-[#222222] mr-[3px]'>
                     <ChatsList 
-                        room={room} 
-                        chats={chats} 
+                        chats={chats}
+                        room={room}  
                         goToChat={goToChat}
                     />
                 </aside>
@@ -41,15 +41,16 @@ export default function ChatsPage() {
                     room={room} 
 
                     getMessageFromAdmin={getMessageFromAdmin}
+                    
                     repliedMessage={repliedMessage}
                     setRepliedMessage={setRepliedMessage}
                     getRepliedMessage={getRepliedMessage}
                     cancelReplyMessage={cancelReplyMessage}
-                    contextMenuOpen={contextMenuOpen}
-                    contextMenuClose={contextMenuClose}
+                    
                     position={position}
-                    menuVisibility={menuVisibility}
-                    getCtxMenuMsg={getCtxMenuMsg}
+                    setPosition={setPosition}
+                    contextMenu={contextMenu} 
+                    setContextMenu={setContextMenu}
                 />
             </main>
         </div>
