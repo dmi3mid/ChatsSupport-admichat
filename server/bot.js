@@ -48,7 +48,7 @@ io.on('connection', async (socket) => {
             text: sentMsgFromAdmin?.reply_to_message?.text || "",
         };
         const jsonMessage = JSON.stringify({message: messageFromAdmin, roomId: parsedData.room});
-        io.emit("updated-admin-message", jsonMessage);
+        socket.emit("updated-admin-message", jsonMessage);
         try {
             await client.connect();
             console.log("Database is connected");
@@ -61,6 +61,27 @@ io.on('connection', async (socket) => {
 
     socket.on("join_room", async (roomId) => {
         console.log(roomId);
+    });
+
+    socket.on('edit-msg-from-client', async (data) => {
+        // console.log(JSON.parse(data));
+        const parsedData = JSON.parse(data)
+        try {
+            await client.connect();
+            console.log("Database is connected");
+            const filters = {
+                room_id: parsedData.roomId,
+                message_id: parsedData.message.message_id
+            }
+            const updatedMessage = {
+                $set: {
+                    text: parsedData.message.text
+                }
+            }
+            await messages.updateOne(filters, updatedMessage);
+        } catch (error) {
+            console.log(error);
+        }
     })
 });
 

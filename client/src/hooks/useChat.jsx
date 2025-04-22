@@ -41,17 +41,32 @@ export default function useChat() {
     const getChangedText = (editedText, editedMsg) => {
         console.log(editedText);
         console.log(editedMsg);
+        let eMsg;
         setMessages(prev => {
             return {
-              ...prev,
-              [room]: prev[room].map(msg =>
-                msg.message_id === editedMsg.message_id
-                  ? { ...msg, text: editedText }
-                  : msg
-              )
-            };
-        });
-    }
+                ...prev,
+                [room]: prev[room].map(msg => {
+                    let newMsg = { ...msg };
+        
+                    if (msg.message_id === editedMsg.message_id) {
+                        newMsg.text = editedText;
+                        eMsg = newMsg;
+                    }
+        
+                    if (msg.replied_message?.message_id === editedMsg.message_id) {
+                        newMsg.replied_message = {
+                            ...msg.replied_message,
+                            text: editedText
+                        };
+                    }
+                    return newMsg;
+                })
+            }
+        })
+        console.log(eMsg);
+
+        socketRef.current.emit('edit-msg-from-client', JSON.stringify({message: eMsg, roomId: room}));
+    };
 
     useEffect(() => {
         const getUsers = async () => {
@@ -77,9 +92,9 @@ export default function useChat() {
                 setMessages(prev => ({
                     ...prev,
                     [message.room_id]: [...(prev[message.room_id] || []), message]
-                }));
+                }))
             })
-        }
+        };
     
         getUsers();
         getMessages();
