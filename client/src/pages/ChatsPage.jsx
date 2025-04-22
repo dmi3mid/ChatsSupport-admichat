@@ -23,7 +23,7 @@ export default function ChatsPage() {
         position, setPosition,
 
         edidingMessage, setEditingMessage,
-        editMessage,
+        getChangedText,
     } = useChat();
 
     return (
@@ -57,7 +57,7 @@ export default function ChatsPage() {
 
                     edidingMessage={edidingMessage} 
                     setEditingMessage={setEditingMessage}
-                    editMessage={editMessage}
+                    getChangedText={getChangedText}
                 />
             </main>
         </div>

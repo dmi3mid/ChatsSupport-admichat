@@ -38,8 +38,19 @@ export default function useChat() {
         setRepliedMessage("");
     }
 
-    const editMessage = (message) => {
-        console.log(message);
+    const getChangedText = (editedText, editedMsg) => {
+        console.log(editedText);
+        console.log(editedMsg);
+        setMessages(prev => {
+            return {
+              ...prev,
+              [room]: prev[room].map(msg =>
+                msg.message_id === editedMsg.message_id
+                  ? { ...msg, text: editedText }
+                  : msg
+              )
+            };
+        });
     }
 
     useEffect(() => {
@@ -145,6 +156,6 @@ export default function useChat() {
         position, setPosition,
 
         edidingMessage, setEditingMessage,
-        editMessage,
+        getChangedText,
     }
 }

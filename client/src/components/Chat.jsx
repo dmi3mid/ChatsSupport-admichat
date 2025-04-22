@@ -1,15 +1,14 @@
 import React from 'react';
 
 import SendMsgForm from './SendMsgForm';
-import MsgFromUser from './Messages/MsgFromUser';
-import MsgFromAdmin from './Messages/MsgFromAdmin';
+import Message from './Message';
 
 
 export default function Chat({
-    messages, 
-    room, 
+    messages,
+    room,
 
-    getMessageFromAdmin, 
+    getMessageFromAdmin,
 
     repliedMessage, setRepliedMessage,
     getRepliedMessage,
@@ -19,7 +18,7 @@ export default function Chat({
     contextMenu, setContextMenu,
 
     edidingMessage, setEditingMessage,
-    editMessage,
+    getChangedText,
 }) {
     return (
         <>
@@ -32,50 +31,35 @@ export default function Chat({
                 : <div id='Chat' className='w-[80%] h-full flex flex-col'>
                     <div className='flex flex-col h-full overflow-y-auto'>
                         {messages[room].map((msg, idx) => (
-                            msg.from_admin
-                            ? <MsgFromAdmin key={idx} 
-                                message={msg} 
+                            <Message key={idx}
+                                message={msg}
 
                                 getRepliedMessage={getRepliedMessage}
 
                                 position={position}
                                 setPosition={setPosition}
-                                contextMenu={contextMenu} 
+                                contextMenu={contextMenu}
                                 setContextMenu={setContextMenu}
 
-                                edidingMessage={edidingMessage} 
+                                edidingMessage={edidingMessage}
                                 setEditingMessage={setEditingMessage}
-                                editMessage={editMessage}
-                            />
-                            : <MsgFromUser key={idx} 
-                                message={msg} 
-
-                                getRepliedMessage={getRepliedMessage}
-
-                                position={position}
-                                setPosition={setPosition}
-                                contextMenu={contextMenu} 
-                                setContextMenu={setContextMenu} 
-
-                                edidingMessage={edidingMessage} 
-                                setEditingMessage={setEditingMessage}
-                                editMessage={editMessage}
+                                getChangedText={getChangedText}
                             />
                         ))}
                     </div>
                     <div className='mb-[3px]'>
-                        <SendMsgForm 
-                            messages={messages[room]} 
-                            room={room} 
+                        <SendMsgForm
+                            messages={messages[room]}
+                            room={room}
 
-                            repliedMessage={repliedMessage} 
+                            repliedMessage={repliedMessage}
                             setRepliedMessage={setRepliedMessage}
-                            getMessageFromAdmin={getMessageFromAdmin} 
+                            getMessageFromAdmin={getMessageFromAdmin}
                             cancelReplyMessage={cancelReplyMessage}
                         />
                     </div>
-               </div>
-                }
-        </> 
+                </div>
+            }
+        </>
     )
 }
