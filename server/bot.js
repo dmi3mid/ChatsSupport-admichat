@@ -134,7 +134,7 @@ bot.on('text', async (msg) => {
         from_admin: false,
         message_id: msg.message_id,
         username: msg.from.username || msg.from.first_name || 'Unknown user',
-        date: msg.date,
+        date: Date.now(),
         text: msg.text,
         replied_message: {
             from_admin: msg?.reply_to_message?.from?.is_bot || false,

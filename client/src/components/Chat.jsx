@@ -18,7 +18,7 @@ export default function Chat({
     contextMenu, setContextMenu,
 
     edidingMessage, setEditingMessage,
-    getChangedText,
+    editMessage,
 }) {
     return (
         <>
@@ -43,7 +43,7 @@ export default function Chat({
 
                                 edidingMessage={edidingMessage}
                                 setEditingMessage={setEditingMessage}
-                                getChangedText={getChangedText}
+                                editMessage={editMessage}
                             />
                         ))}
                     </div>

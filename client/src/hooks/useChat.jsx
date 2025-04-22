@@ -38,7 +38,7 @@ export default function useChat() {
         setRepliedMessage("");
     }
 
-    const getChangedText = (editedText, editedMsg) => {
+    const editMessage = (editedText, editedMsg) => {
         console.log(editedText);
         console.log(editedMsg);
         let eMsg;
@@ -171,6 +171,6 @@ export default function useChat() {
         position, setPosition,
 
         edidingMessage, setEditingMessage,
-        getChangedText,
+        editMessage,
     }
 }

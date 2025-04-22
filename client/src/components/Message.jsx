@@ -12,7 +12,7 @@ export default function Message({
   contextMenu, setContextMenu,
 
   edidingMessage, setEditingMessage,
-  getChangedText,
+  editMessage,
 }) {
   const adminStyles = [
     'w-[300px] p-[10px] rounded-tl-[15px] rounded-tr-[15px] rounded-br-[15px] break-words inline-block bg-[#002b28]',
@@ -57,13 +57,16 @@ export default function Message({
   }
   const editing = (ev) => {
     ev.preventDefault();
-    getChangedText(editedTextMsg, message);
+    editMessage(editedTextMsg, message);
     setEditingMessage(0);
   }
   const cancelEditing = () => {
     setEditingMessage(0);
   }
   const isEditing = message.message_id === edidingMessage;
+
+  console.log(message.date);
+  const date = new Date(message.date);
   return (
     <div className='mb-[10px]'>
       <div onContextMenu={contextMenuOpen} className={message.from_admin ? adminStyles[0] : userStyles[0]}>
@@ -114,6 +117,9 @@ export default function Message({
             </p>
           </form>
         )}
+        <div className='flex justify-end items-center text-[12px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70'>
+          {date.getHours()}:{(date.getMinutes()) < 10 ? '0'+date.getMinutes() : date.getMinutes()} {date.getDate()}/{date.getMonth()+1}/{date.getFullYear()}
+        </div>
       </div>
     </div>
   )
