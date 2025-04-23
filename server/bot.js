@@ -28,9 +28,22 @@ const client = new MongoClient("mongodb://localhost:27017/");
 const users = client.db("admichat").collection("users");
 const messages = client.db("admichat").collection("messages");
 
-let messageFromAdmin;
+let connections = new Map();
+function emitToRoom(roomId, event, data) {
+    const socketId = connections.get(roomId);
+    if (!socketId) return;
+    io.to(socketId).emit(event, data);
+}
+
 io.on('connection', async (socket) => {
+    let messageFromAdmin;
     console.log("Conection via socket.io");
+
+    socket.on("join-room", async (roomId) => {
+        console.log(roomId);
+        connections.set(roomId, socket.id);
+    });
+
     socket.on('admin-message', async (data) => {
         const parsedData = JSON.parse(data); // message and room
         messageFromAdmin = parsedData.message;
@@ -40,6 +53,7 @@ io.on('connection', async (socket) => {
         messageFromAdmin.message_id = sentMsgFromAdmin.message_id;
         messageFromAdmin.room_id = sentMsgFromAdmin.chat.id;
         delete messageFromAdmin.replied_message;
+        messageFromAdmin.edited = false;
         messageFromAdmin.replied_message = {
             from_admin: sentMsgFromAdmin?.reply_to_message?.from?.is_bot || false,
             message_id: sentMsgFromAdmin?.reply_to_message?.message_id || 0,
@@ -59,12 +73,7 @@ io.on('connection', async (socket) => {
         }
     });
 
-    socket.on("join_room", async (roomId) => {
-        console.log(roomId);
-    });
-
     socket.on('edit-msg-from-client', async (data) => {
-        // console.log(JSON.parse(data));
         const parsedData = JSON.parse(data)
         try {
             await client.connect();
@@ -75,10 +84,31 @@ io.on('connection', async (socket) => {
             }
             const updatedMessage = {
                 $set: {
-                    text: parsedData.message.text
+                    text: parsedData.message.text,
+                    edited: true,
                 }
             }
             await messages.updateOne(filters, updatedMessage);
+        } catch (error) {
+            console.log(error);
+        }
+        bot.editMessageText(parsedData.message.text, {
+            chat_id: parsedData.roomId,
+            message_id: parsedData.message.message_id,
+        });
+    })
+
+    socket.on('del-msg-from-client', async (data) => {
+        const parsedData = JSON.parse(data)
+        await bot.deleteMessage(parsedData.roomId, parsedData.message.message_id);
+        try {
+            await client.connect();
+            console.log("Database is connected");
+            const filters = {
+                room_id: parsedData.roomId,
+                message_id: parsedData.message.message_id,
+            }
+            await messages.deleteOne(filters);
         } catch (error) {
             console.log(error);
         }
@@ -109,11 +139,13 @@ app.get('/getMessages', async (req, res) => {
 bot.onText(/\/start/, async (msg) => {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
-
+    // connections.set(chatId, )
     const user = {
         _id: msg.from.id,
         username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
     }
+    const jsonData = JSON.stringify(user);
+    io.emit('start', jsonData);
 
     try {
         await client.connect();
@@ -129,13 +161,13 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.on('text', async (msg) => {
     const message = {
-        _id: new ObjectId(),
         room_id: msg.from.id,
         from_admin: false,
         message_id: msg.message_id,
         username: msg.from.username || msg.from.first_name || 'Unknown user',
         date: Date.now(),
         text: msg.text,
+        edited: false,
         replied_message: {
             from_admin: msg?.reply_to_message?.from?.is_bot || false,
             message_id: msg?.reply_to_message?.message_id || 0,
@@ -147,7 +179,10 @@ bot.on('text', async (msg) => {
     
     const roomId = msg.from.id;
     const jsonMessage = JSON.stringify({message, roomId});
-    io.emit('user-message', jsonMessage);
+    // Потрібно заемітити тільки поточному підключенню
+    io.to(connections.get(roomId)).emit('user-message', jsonMessage);
+    // io.emit('user-message', jsonMessage);
+    // emitToRoom(roomId, 'user-message', jsonMessage);
 
     try {
         await client.connect();
@@ -159,7 +194,6 @@ bot.on('text', async (msg) => {
 });
 
 bot.on('edited_message', async (msg) => {
-    // console.log(msg.from.id);
     const roomId = msg.from.id;
     const messageId = msg.message_id;
     const editedMsg = {
@@ -167,7 +201,11 @@ bot.on('edited_message', async (msg) => {
         messageId: msg.message_id
     }
     const jsonEditedMsg = JSON.stringify({editedMsg, roomId});
-    io.emit('edit-msg-from-bot', jsonEditedMsg);
+    // Потрібно заемітити тільки поточному підключенню
+    // io.emit('edit-msg-from-bot', jsonEditedMsg);
+    io.to(connections.get(roomId)).emit('edit-msg-from-bot', jsonEditedMsg);
+    // emitToRoom(roomId, 'edit-msg-from-bot', jsonEditedMsg);
+
     try {
         await client.connect();
         console.log("Database is connected");
@@ -184,4 +222,4 @@ bot.on('edited_message', async (msg) => {
     } catch (error) {
         console.log(error);
     }
-})
+});

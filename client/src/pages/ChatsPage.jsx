@@ -24,8 +24,10 @@ export default function ChatsPage() {
 
         edidingMessage, setEditingMessage,
         editMessage,
-    } = useChat();
 
+        deleteMessage,
+    } = useChat();
+    
     return (
         <div className='bg-[#1b1b1b]'>
             <header className='flex justify-center items-center h-[50px]'>
@@ -58,6 +60,8 @@ export default function ChatsPage() {
                     edidingMessage={edidingMessage} 
                     setEditingMessage={setEditingMessage}
                     editMessage={editMessage}
+
+                    deleteMessage={deleteMessage}
                 />
             </main>
         </div>

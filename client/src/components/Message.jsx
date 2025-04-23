@@ -13,6 +13,8 @@ export default function Message({
 
   edidingMessage, setEditingMessage,
   editMessage,
+
+  deleteMessage,
 }) {
   const adminStyles = [
     'w-[300px] p-[10px] rounded-tl-[15px] rounded-tr-[15px] rounded-br-[15px] break-words inline-block bg-[#002b28]',
@@ -65,7 +67,12 @@ export default function Message({
   }
   const isEditing = message.message_id === edidingMessage;
 
-  console.log(message.date);
+  const deleting = () => {
+    deleteMessage(message);
+    setContextMenu(0);
+  }
+
+  // console.log(message.date);
   const date = new Date(message.date);
   return (
     <div className='mb-[10px]'>
@@ -88,7 +95,7 @@ export default function Message({
             </p>
           </div>
         }
-        {isContextMenu && (
+        {(isContextMenu && message.from_admin) && (
           <div className={message.from_admin ? adminStyles[2] : userStyles[2]} style={{ left: `${position.x}px`, top: `${position.y - 100}px` }}>
             <p onClick={contextMenuClose} className={message.from_admin ? adminStyles[3] : userStyles[3]}>
               <X height={15} />
@@ -98,7 +105,7 @@ export default function Message({
               <Pencil height={15} />
               Edit message
             </p>
-            <p className={message.from_admin ? adminStyles[3] : userStyles[3]}>
+            <p onClick={deleting} className={message.from_admin ? adminStyles[3] : userStyles[3]}>
               <Trash2 height={15} />
               Delete message
             </p>
@@ -117,8 +124,14 @@ export default function Message({
             </p>
           </form>
         )}
-        <div className='flex justify-end items-center text-[12px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70'>
-          {date.getHours()}:{(date.getMinutes()) < 10 ? '0'+date.getMinutes() : date.getMinutes()} {date.getDate()}/{date.getMonth()+1}/{date.getFullYear()}
+        <div className='flex justify-between items-center'>
+          {(message.edited) 
+            ? <p className='text-[12px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70'>edited</p>
+            : <p></p>
+          }
+          <p className='text-[12px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70'>
+            {date.getHours()}:{(date.getMinutes()) < 10 ? '0'+date.getMinutes() : date.getMinutes()} {date.getDate()}/{date.getMonth()+1}/{date.getFullYear()}
+          </p>
         </div>
       </div>
     </div>

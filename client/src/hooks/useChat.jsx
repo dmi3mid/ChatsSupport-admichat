@@ -19,7 +19,7 @@ export default function useChat() {
 
     const goToChat = (roomId) => {
         setRoom(roomId);
-        socketRef.current.emit('join_room', roomId);
+        socketRef.current.emit('join-room', roomId);
         setMessages(prev => ({
             ...prev,
             [roomId]: prev[roomId] || []
@@ -56,7 +56,8 @@ export default function useChat() {
                     if (msg.replied_message?.message_id === editedMsg.message_id) {
                         newMsg.replied_message = {
                             ...msg.replied_message,
-                            text: editedText
+                            text: editedText,
+                            edited: true,
                         };
                     }
                     return newMsg;
@@ -67,6 +68,19 @@ export default function useChat() {
 
         socketRef.current.emit('edit-msg-from-client', JSON.stringify({message: eMsg, roomId: room}));
     };
+
+    const deleteMessage = (message) => {
+        console.log(message);
+        const updatedMessages = messages[room].filter(msg => msg.message_id !== message.message_id);
+        setMessages(prev => {
+            return {
+                ...prev,
+                [room]: updatedMessages,
+            }
+        })
+        socketRef.current.emit('del-msg-from-client', JSON.stringify({message, roomId: room}));
+        //console.log(updatedMessages);
+    }
 
     useEffect(() => {
         const getUsers = async () => {
@@ -106,21 +120,35 @@ export default function useChat() {
         // console.log(messagesRef);
         // console.log(messages);
         
-        socket.on('user-message', (data) => {
-            const parsedData = JSON.parse(data);
+        socket.on('start', (data) => {
+            const parsedData = JSON.parse(data)
             const newchat = {
-                roomId: parsedData.roomId,
-                username: parsedData.message.username,
+                roomId: parsedData._id,
+                username: parsedData.username,
             };
-            setMessages(prev => ({
-                ...prev,
-                [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
-            }));
 
             setChats(prev => {
                 if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
                 return [...prev, newchat];
             });
+        })
+
+        socket.on('user-message', (data) => {
+            const parsedData = JSON.parse(data);
+            console.log(parsedData);
+            // const newchat = {
+            //     roomId: parsedData.roomId,
+            //     username: parsedData.message.username,
+            // };
+            setMessages(prev => ({
+                ...prev,
+                [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
+            }));
+
+            // setChats(prev => {
+            //     if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
+            //     return [...prev, newchat];
+            // });
         });
 
         socket.on('updated-admin-message', (data) => {
@@ -147,7 +175,7 @@ export default function useChat() {
                   ...prev,
                   [roomId]: prev[roomId].map(msg =>
                     msg.message_id === editedMsg.messageId
-                      ? { ...msg, text: editedMsg.text }
+                      ? { ...msg, text: editedMsg.text, edited: true }
                       : msg
                   )
                 };
@@ -172,5 +200,7 @@ export default function useChat() {
 
         edidingMessage, setEditingMessage,
         editMessage,
+
+        deleteMessage,
     }
 }
