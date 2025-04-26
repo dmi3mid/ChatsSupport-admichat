@@ -1,10 +1,12 @@
+require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
-const WebSocket = require('ws');
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { MongoClient } = require('mongodb');
 const cors = require('cors');
+
+
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -15,25 +17,24 @@ const io = new Server(httpServer, {
         methods: ["GET", "POST"]
     }
 });
-httpServer.listen(2800, () => {
-    console.log("Http server is running");
-});
-
-const { MongoClient, ObjectId } = require('mongodb');
-const uniqid = require('uniqid');
-require('dotenv').config();
-
+let connections = new Map();
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const client = new MongoClient("mongodb://localhost:27017/");
 const users = client.db("admichat").collection("users");
 const messages = client.db("admichat").collection("messages");
-
-let connections = new Map();
-function emitToRoom(roomId, event, data) {
-    const socketId = connections.get(roomId);
-    if (!socketId) return;
-    io.to(socketId).emit(event, data);
+async function listenServer () {
+    try {
+        httpServer.listen(2800, () => {
+            console.log("Http server is running");
+        });
+        await client.connect();
+        console.log("Database is connected");
+    } catch (error) {
+        console.log(error);
+    }
 }
+listenServer();
+
 
 io.on('connection', async (socket) => {
     let messageFromAdmin;
@@ -64,8 +65,6 @@ io.on('connection', async (socket) => {
         const jsonMessage = JSON.stringify({message: messageFromAdmin, roomId: parsedData.room});
         socket.emit("updated-admin-message", jsonMessage);
         try {
-            await client.connect();
-            console.log("Database is connected");
             delete messageFromAdmin.repliedMessage;
             messages.insertOne(messageFromAdmin);
         } catch (error) {
@@ -76,8 +75,6 @@ io.on('connection', async (socket) => {
     socket.on('edit-msg-from-client', async (data) => {
         const parsedData = JSON.parse(data)
         try {
-            await client.connect();
-            console.log("Database is connected");
             const filters = {
                 room_id: parsedData.roomId,
                 message_id: parsedData.message.message_id
@@ -102,8 +99,6 @@ io.on('connection', async (socket) => {
         const parsedData = JSON.parse(data)
         await bot.deleteMessage(parsedData.roomId, parsedData.message.message_id);
         try {
-            await client.connect();
-            console.log("Database is connected");
             const filters = {
                 room_id: parsedData.roomId,
                 message_id: parsedData.message.message_id,
@@ -139,7 +134,6 @@ app.get('/getMessages', async (req, res) => {
 bot.onText(/\/start/, async (msg) => {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
-    // connections.set(chatId, )
     const user = {
         _id: msg.from.id,
         username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
@@ -148,8 +142,6 @@ bot.onText(/\/start/, async (msg) => {
     io.emit('start', jsonData);
 
     try {
-        await client.connect();
-        console.log("Database is connected");
         if (!await users.findOne({_id: userId})) users.insertOne(user);
         else console.log("Users already in database");
     } catch (error) {
@@ -185,8 +177,6 @@ bot.on('text', async (msg) => {
     // emitToRoom(roomId, 'user-message', jsonMessage);
 
     try {
-        await client.connect();
-        console.log("Database is connected");
         messages.insertOne(message);
     } catch (error) {
         console.log(error);
@@ -207,15 +197,14 @@ bot.on('edited_message', async (msg) => {
     // emitToRoom(roomId, 'edit-msg-from-bot', jsonEditedMsg);
 
     try {
-        await client.connect();
-        console.log("Database is connected");
         const filters = {
             room_id: roomId,
             message_id: messageId
         }
         const updatedMessage = {
             $set: {
-                text: editedMsg.text
+                text: editedMsg.text,
+                edited: true
             }
         }
         await messages.updateOne(filters, updatedMessage);

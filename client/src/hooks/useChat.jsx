@@ -79,14 +79,12 @@ export default function useChat() {
             }
         })
         socketRef.current.emit('del-msg-from-client', JSON.stringify({message, roomId: room}));
-        //console.log(updatedMessages);
     }
 
     useEffect(() => {
         const getUsers = async () => {
             const response = await axios.get('http://localhost:2800/getUsers');
             const usersData = response.data;
-            // console.log(usersData);
             usersData.forEach((user) => {
                 const newchat = {
                     roomId: user._id,
@@ -101,7 +99,6 @@ export default function useChat() {
         const getMessages = async () => {
             const response = await axios.get('http://localhost:2800/getMessages');
             const messagesData = response.data;
-            // console.log(messagesData);
             messagesData.forEach((message) => {
                 setMessages(prev => ({
                     ...prev,
@@ -117,8 +114,6 @@ export default function useChat() {
     useEffect(() => {
         const socket = io('http://localhost:2800');
         socketRef.current = socket;
-        // console.log(messagesRef);
-        // console.log(messages);
         
         socket.on('start', (data) => {
             const parsedData = JSON.parse(data)
@@ -136,19 +131,10 @@ export default function useChat() {
         socket.on('user-message', (data) => {
             const parsedData = JSON.parse(data);
             console.log(parsedData);
-            // const newchat = {
-            //     roomId: parsedData.roomId,
-            //     username: parsedData.message.username,
-            // };
             setMessages(prev => ({
                 ...prev,
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
             }));
-
-            // setChats(prev => {
-            //     if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
-            //     return [...prev, newchat];
-            // });
         });
 
         socket.on('updated-admin-message', (data) => {
