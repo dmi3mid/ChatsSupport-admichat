@@ -9,17 +9,17 @@ export default function useChat() {
 
     const [repliedMessage, setRepliedMessage] = useState({});
 
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [contextMenu, setContextMenu] = useState(0);
+    // const [position, setPosition] = useState({ x: 0, y: 0 });
+    // const [contextMenu, setContextMenu] = useState(0);
 
-    const [edidingMessage, setEditingMessage] = useState(0);
+    // const [edidingMessage, setEditingMessage] = useState(0);
 
     const socketRef = useRef(null);
 
 
     const goToChat = (roomId) => {
         setRoom(roomId);
-        socketRef.current.emit('join-room', roomId);
+        socketRef.current.emit('join-room', JSON.stringify({roomId}));
         setMessages(prev => ({
             ...prev,
             [roomId]: prev[roomId] || []
@@ -30,7 +30,10 @@ export default function useChat() {
         socketRef.current.emit('admin-message', JSON.stringify({message, room}));
     }
 
-    const getRepliedMessage = (message) => {
+    // const getRepliedMessage = (message) => {
+    //     setRepliedMessage(message)
+    // }
+    const onReplyMessage = (message) => {
         setRepliedMessage(message)
     }
 
@@ -129,6 +132,7 @@ export default function useChat() {
         })
 
         socket.on('user-message', (data) => {
+            console.log('user-msg')
             const parsedData = JSON.parse(data);
             console.log(parsedData);
             setMessages(prev => ({
@@ -178,13 +182,13 @@ export default function useChat() {
         getMessageFromAdmin,
 
         repliedMessage, setRepliedMessage,
-        getRepliedMessage,
+        onReplyMessage,
         cancelReplyMessage,
 
-        contextMenu, setContextMenu,
-        position, setPosition,
+        // contextMenu, setContextMenu,
+        // position, setPosition,
 
-        edidingMessage, setEditingMessage,
+        // edidingMessage, setEditingMessage,
         editMessage,
 
         deleteMessage,

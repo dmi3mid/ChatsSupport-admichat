@@ -6,12 +6,12 @@ import Input from './UI/Input';
 export default function Message({
   message,
 
-  getRepliedMessage,
+  onReplyMessage,
 
-  position, setPosition,
-  contextMenu, setContextMenu,
+  // position, setPosition,
+  // contextMenu, setContextMenu,
 
-  edidingMessage, setEditingMessage,
+  // edidingMessage, setEditingMessage,
   editMessage,
 
   deleteMessage,
@@ -34,10 +34,9 @@ export default function Message({
   ];
 
   const [editedTextMsg, setEditedTextMsg] = useState('');
-
-  const onReplyToMessage = () => {
-    getRepliedMessage(message);
-  }
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState(0);
+  const [edidingMessage, setEditingMessage] = useState(0);
   
   const contextMenuOpen = (ev) => {
     ev.preventDefault();
@@ -79,7 +78,7 @@ export default function Message({
       <div onContextMenu={contextMenuOpen} className={message.from_admin ? adminStyles[0] : userStyles[0]}>
         <header className='flex justify-between items-center'>
           <h2 className='text-[17px] font-[Ubuntu] font-[400] text-[#AAAAAA]'>{message.username}</h2>
-          <h2 onClick={onReplyToMessage} className='text-[15px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70 duration-200 hover:opacity-100'>reply</h2>
+          <h2 onClick={() => onReplyMessage(message)} className='text-[15px] font-[Ubuntu] font-[300] text-[#AAAAAA] opacity-70 duration-200 hover:opacity-100'>reply</h2>
         </header>
         {(message.replied_message.message_id === 0)
           ? <p className='text-[15px] font-[Ubuntu] font-[300] text-[#AAAAAA]'>

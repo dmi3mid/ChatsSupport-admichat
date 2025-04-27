@@ -19,7 +19,7 @@ module.exports = async function onText(msg, io, connections, messages) {
         
         const roomId = msg.from.id;
         const jsonMessage = JSON.stringify({message, roomId});
-        io.to(connections.get(roomId)).emit('user-message', jsonMessage); 
+        await io.to(connections.get(roomId)).emit('user-message', jsonMessage); 
         await messages.insertOne(message);
     } catch (error) {
         console.log(error);

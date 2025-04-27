@@ -11,13 +11,13 @@ export default function Chat({
     getMessageFromAdmin,
 
     repliedMessage, setRepliedMessage,
-    getRepliedMessage,
+    onReplyMessage,
     cancelReplyMessage,
 
-    position, setPosition,
-    contextMenu, setContextMenu,
+    // position, setPosition,
+    // contextMenu, setContextMenu,
 
-    edidingMessage, setEditingMessage,
+    // edidingMessage, setEditingMessage,
     editMessage,
 
     deleteMessage,
@@ -43,13 +43,13 @@ export default function Chat({
                             <Message
                                 key={idx}
                                 message={msg}
-                                getRepliedMessage={getRepliedMessage}
-                                position={position}
-                                setPosition={setPosition}
-                                contextMenu={contextMenu}
-                                setContextMenu={setContextMenu}
-                                edidingMessage={edidingMessage}
-                                setEditingMessage={setEditingMessage}
+                                onReplyMessage={onReplyMessage}
+                                // position={position}
+                                // setPosition={setPosition}
+                                // contextMenu={contextMenu}
+                                // setContextMenu={setContextMenu}
+                                // edidingMessage={edidingMessage}
+                                // setEditingMessage={setEditingMessage}
                                 editMessage={editMessage}
                                 deleteMessage={deleteMessage}
                             />

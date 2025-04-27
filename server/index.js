@@ -22,8 +22,8 @@ const client = new MongoClient("mongodb://localhost:27017/");
 const users = client.db("admichat").collection("users");
 const messages = client.db("admichat").collection("messages");
 
-const { initBot } = require('./bot/bot');
 const { initWsConnection } = require('./chat/chat');
+const { initBot } = require('./bot/bot');
 const { initAuth } = require('./authorization/authorization');
 
 async function start() {
@@ -33,8 +33,8 @@ async function start() {
         });
         await client.connect();
         console.log("Database is connected");
-        initBot(bot, io, users, messages, connections);
         initWsConnection(io, connections, app, bot, users, messages);
+        initBot(bot, io, users, messages, connections);
         initAuth();
     } catch (error) {
         console.log(error);

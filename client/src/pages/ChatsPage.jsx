@@ -16,13 +16,13 @@ export default function ChatsPage() {
         getMessageFromAdmin,
 
         repliedMessage, setRepliedMessage,
-        getRepliedMessage,
+        onReplyMessage,
         cancelReplyMessage,
 
-        contextMenu, setContextMenu,
-        position, setPosition,
+        // contextMenu, setContextMenu,
+        // position, setPosition,
 
-        edidingMessage, setEditingMessage,
+        // edidingMessage, setEditingMessage,
         editMessage,
 
         deleteMessage,
@@ -49,16 +49,16 @@ export default function ChatsPage() {
                     
                     repliedMessage={repliedMessage}
                     setRepliedMessage={setRepliedMessage}
-                    getRepliedMessage={getRepliedMessage}
+                    onReplyMessage={onReplyMessage}
                     cancelReplyMessage={cancelReplyMessage}
 
-                    position={position}
-                    setPosition={setPosition}
-                    contextMenu={contextMenu} 
-                    setContextMenu={setContextMenu}
+                    // position={position}
+                    // setPosition={setPosition}
+                    // contextMenu={contextMenu} 
+                    // setContextMenu={setContextMenu}
 
-                    edidingMessage={edidingMessage} 
-                    setEditingMessage={setEditingMessage}
+                    // edidingMessage={edidingMessage} 
+                    // setEditingMessage={setEditingMessage}
                     editMessage={editMessage}
 
                     deleteMessage={deleteMessage}
