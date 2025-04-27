@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "bot": "nodemon bot.js",
-    "server": "nodemon server.js"
+    "server": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
