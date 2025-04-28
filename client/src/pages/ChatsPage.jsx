@@ -26,6 +26,8 @@ export default function ChatsPage() {
         editMessage,
 
         deleteMessage,
+
+        closeChat,
     } = useChat();
     
     return (
@@ -39,6 +41,7 @@ export default function ChatsPage() {
                         chats={chats}
                         room={room}  
                         goToChat={goToChat}
+                        closeChat={closeChat}
                     />
                 </aside>
                 <Chat 

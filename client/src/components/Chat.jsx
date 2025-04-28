@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import SendMsgForm from './SendMsgForm';
 import Message from './Message';
@@ -22,6 +22,7 @@ export default function Chat({
 
     deleteMessage,
 }) {
+    const [contextMenu, setContextMenu] = useState(0);
     return (
         <>
             {!room ? (
@@ -46,8 +47,8 @@ export default function Chat({
                                 onReplyMessage={onReplyMessage}
                                 // position={position}
                                 // setPosition={setPosition}
-                                // contextMenu={contextMenu}
-                                // setContextMenu={setContextMenu}
+                                contextMenu={contextMenu}
+                                setContextMenu={setContextMenu}
                                 // edidingMessage={edidingMessage}
                                 // setEditingMessage={setEditingMessage}
                                 editMessage={editMessage}

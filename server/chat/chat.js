@@ -2,6 +2,7 @@ const onAdminMsg = require('./onHandlers/onAdminMsg');
 const onEditClientMsg = require('./onHandlers/onEditClientMsg');
 const onDeleteClientMsg = require('./onHandlers/onDeleteClientMsg');
 const onJoinRoom = require('./onHandlers/onJoinRoom');
+// const onAdminClosedChat = require('./onHandlers/onAdminClosedChat');
 
 
 function initWsConnection(io, connections, app, bot, users, messages) {
@@ -18,32 +19,16 @@ function initWsConnection(io, connections, app, bot, users, messages) {
     
         socket.on('edit-msg-from-client', async (data) => {
             onEditClientMsg(data, bot, messages);
-        })
+        });
     
         socket.on('del-msg-from-client', async (data) => {
             onDeleteClientMsg(data, bot, messages);
-        })
+        });
+
+        // socket.on('admin-closed-chat', async (data) => {
+        //     onAdminClosedChat(data, bot)
+        // })
     });
-    
-    app.get('/getUsers', async (req, res) => {
-        try {
-            const usersData = await users.find({}).toArray();
-            res.send(JSON.stringify(usersData));
-        }
-        catch (error) {
-            console.log(error);
-        }
-    
-    });
-    app.get('/getMessages', async (req, res) => {
-        try {
-            const messagesData = await messages.find({}).limit(30).toArray();
-            res.send(JSON.stringify(messagesData));
-        }
-        catch (error) {
-            console.log(error)
-        }
-    })
 }
 
 module.exports = {

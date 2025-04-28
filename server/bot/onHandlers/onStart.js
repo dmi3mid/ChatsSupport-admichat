@@ -5,6 +5,7 @@ module.exports = async function (msg, bot, io, users) {
         const user = {
             _id: msg.from.id,
             username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
+            isOpened: true
         }
         const jsonData = JSON.stringify(user);
         io.emit('start', jsonData);

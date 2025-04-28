@@ -4,6 +4,7 @@ import './App.css';
 
 import MainPage from './pages/MainPage';
 import ChatsPage from './pages/ChatsPage';
+import SettingsPage from './pages/SettingsPage';
 
 export default function App() {
   return (
@@ -14,6 +15,9 @@ export default function App() {
         }/>
         <Route path='/chats' element={
           <ChatsPage />
+        }/>
+        <Route path='/settings' element={
+          <SettingsPage/>
         }/>
       </Routes>
     </div>

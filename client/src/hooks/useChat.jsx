@@ -9,11 +9,6 @@ export default function useChat() {
 
     const [repliedMessage, setRepliedMessage] = useState({});
 
-    // const [position, setPosition] = useState({ x: 0, y: 0 });
-    // const [contextMenu, setContextMenu] = useState(0);
-
-    // const [edidingMessage, setEditingMessage] = useState(0);
-
     const socketRef = useRef(null);
 
 
@@ -30,9 +25,6 @@ export default function useChat() {
         socketRef.current.emit('admin-message', JSON.stringify({message, room}));
     }
 
-    // const getRepliedMessage = (message) => {
-    //     setRepliedMessage(message)
-    // }
     const onReplyMessage = (message) => {
         setRepliedMessage(message)
     }
@@ -84,6 +76,25 @@ export default function useChat() {
         socketRef.current.emit('del-msg-from-client', JSON.stringify({message, roomId: room}));
     }
 
+
+    const closeChat = async (closedChat) => {
+        // setChats(prevChats => prevChats.filter(chat => chat.roomId !== closedChat));
+        setChats(prevChats =>
+            prevChats.map(chat =>
+                chat.roomId === closedChat
+                    ? { ...chat, isOpened: false } // створюємо новий об'єкт з оновленим opened
+                    : chat // інші об'єкти залишаємо без змін
+            )
+        );
+        const response = await axios.post('http://localhost:2800/closeChat', {isOpened: false}, {
+            headers: {  
+                roomId: closedChat,
+            }
+        });
+    }
+
+
+
     useEffect(() => {
         const getUsers = async () => {
             const response = await axios.get('http://localhost:2800/getUsers');
@@ -92,6 +103,7 @@ export default function useChat() {
                 const newchat = {
                     roomId: user._id,
                     username: user.username,
+                    isOpened: user.isOpened,
                 }
                 setChats(prev => {
                     if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
@@ -123,6 +135,7 @@ export default function useChat() {
             const newchat = {
                 roomId: parsedData._id,
                 username: parsedData.username,
+                isOpened: parsedData.isOpened,
             };
 
             setChats(prev => {
@@ -132,9 +145,7 @@ export default function useChat() {
         })
 
         socket.on('user-message', (data) => {
-            console.log('user-msg')
             const parsedData = JSON.parse(data);
-            console.log(parsedData);
             setMessages(prev => ({
                 ...prev,
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
@@ -148,7 +159,7 @@ export default function useChat() {
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
             }));
         });
-        
+
         
         return () => {
             socket.disconnect();
@@ -185,12 +196,10 @@ export default function useChat() {
         onReplyMessage,
         cancelReplyMessage,
 
-        // contextMenu, setContextMenu,
-        // position, setPosition,
-
-        // edidingMessage, setEditingMessage,
         editMessage,
 
         deleteMessage,
+
+        closeChat,
     }
 }

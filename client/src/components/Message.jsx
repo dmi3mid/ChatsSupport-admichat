@@ -9,7 +9,7 @@ export default function Message({
   onReplyMessage,
 
   // position, setPosition,
-  // contextMenu, setContextMenu,
+  contextMenu, setContextMenu,
 
   // edidingMessage, setEditingMessage,
   editMessage,
@@ -35,17 +35,16 @@ export default function Message({
 
   const [editedTextMsg, setEditedTextMsg] = useState('');
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [contextMenu, setContextMenu] = useState(0);
+  // const [contextMenu, setContextMenu] = useState(0);
   const [edidingMessage, setEditingMessage] = useState(0);
   
   const contextMenuOpen = (ev) => {
     ev.preventDefault();
-    setContextMenu(0);
-    setContextMenu(message.message_id);
     setPosition({
       x: ev.clientX,
       y: ev.clientY,
     });
+    setContextMenu(message.message_id);
   }
   const contextMenuClose = () => {
     setContextMenu(0);
