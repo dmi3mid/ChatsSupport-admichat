@@ -108,6 +108,21 @@ export default function useChat() {
             }));
         });
 
+        socket.on('call', (data) => {
+            const parsedData = JSON.parse(data);
+            console.log(parsedData);
+            const newchat = {
+                roomId: parsedData._id,
+                username: parsedData.username,
+                isOpened: parsedData.isOpened,
+            }
+            setChats(prev => {
+                if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
+                return [...prev, newchat];
+            });
+            
+        })
+
         
         return () => {
             socket.disconnect();

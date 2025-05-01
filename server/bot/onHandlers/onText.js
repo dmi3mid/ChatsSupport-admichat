@@ -7,6 +7,7 @@ module.exports = async function onText(msg, io, connections, messages) {
             username: msg.from.username || msg.from.first_name || 'Unknown user',
             date: Date.now(),
             text: msg.text,
+            is_bot_msg: true,
         };
         
         const roomId = msg.from.id;

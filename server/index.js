@@ -83,7 +83,16 @@ app.post('/closeChat', async (req, res) => {
             }
         }
         await users.updateOne(filters, updatedData);
-        await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
+        if (connections.get(`user-${headers.roomid}`)) {
+            io.to(connections.get(`user-${headers.roomid}`)).emit('admin-closed-chat', JSON.stringify({
+                from_admin: true,
+                username: "admi3chatbot",
+                date: Date.now(),
+                text: "The admin has closed your chat. To get another help send call"
+            }));
+        } else {
+            await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
+        }
     } catch (error) {
         console.log(error);
     }

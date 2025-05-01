@@ -4,6 +4,7 @@ const onJoinRoom = require('./onHandlers/onJoinRoom');
 
 const onUserMsg = require('./onHandlers/onHanlersWeb/onUserMsg');
 const onStart = require('./onHandlers/onHanlersWeb/onStart');
+const onCall = require('./onHandlers/onHanlersWeb/onCall');
 
 
 function initWsConnection(io, connections, app, bot, users, messages) {
@@ -15,12 +16,12 @@ function initWsConnection(io, connections, app, bot, users, messages) {
         });
     
         socket.on('admin-message', (data) => {
-            onAdminMsg(socket, data, bot, messages);
+            onAdminMsg(io, connections, socket, data, bot, messages);
         });
 
-        socket.on('admin-closed-chat', async (data) => {
-            onAdminClosedChat(data, bot)
-        })
+        // socket.on('admin-closed-chat', async (data) => {
+        //     onAdminClosedChat(io, connections, data, bot)
+        // })
 
 
         // for WebAPI of admichat;
@@ -31,6 +32,10 @@ function initWsConnection(io, connections, app, bot, users, messages) {
         socket.on('user-message', (data) => {
             onUserMsg(io, socket, connections, data, messages);
         });
+
+        socket.on('call', (data) => {
+            onCall(io, connections, data, users);
+        })
     });
 }
 
