@@ -4,25 +4,7 @@ import SendMsgForm from './SendMsgForm';
 import Message from './Message';
 
 
-export default function Chat({
-    messages,
-    room,
-
-    getMessageFromAdmin,
-
-    repliedMessage, setRepliedMessage,
-    onReplyMessage,
-    cancelReplyMessage,
-
-    // position, setPosition,
-    // contextMenu, setContextMenu,
-
-    // edidingMessage, setEditingMessage,
-    editMessage,
-
-    deleteMessage,
-}) {
-    const [contextMenu, setContextMenu] = useState(0);
+export default function Chat({ messages, room, getMessageFromAdmin }) {
     return (
         <>
             {!room ? (
@@ -44,15 +26,6 @@ export default function Chat({
                             <Message
                                 key={idx}
                                 message={msg}
-                                onReplyMessage={onReplyMessage}
-                                // position={position}
-                                // setPosition={setPosition}
-                                contextMenu={contextMenu}
-                                setContextMenu={setContextMenu}
-                                // edidingMessage={edidingMessage}
-                                // setEditingMessage={setEditingMessage}
-                                editMessage={editMessage}
-                                deleteMessage={deleteMessage}
                             />
                         ))}
                     </div>
@@ -60,10 +33,7 @@ export default function Chat({
                         <SendMsgForm
                             messages={messages[room]}
                             room={room}
-                            repliedMessage={repliedMessage}
-                            setRepliedMessage={setRepliedMessage}
                             getMessageFromAdmin={getMessageFromAdmin}
-                            cancelReplyMessage={cancelReplyMessage}
                         />
                     </div>
                 </div>

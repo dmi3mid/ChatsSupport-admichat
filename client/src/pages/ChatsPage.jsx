@@ -11,22 +11,9 @@ export default function ChatsPage() {
         chats, setChats,
         messages, setMessages,
         room, setRoom,
+
         goToChat,
-
         getMessageFromAdmin,
-
-        repliedMessage, setRepliedMessage,
-        onReplyMessage,
-        cancelReplyMessage,
-
-        // contextMenu, setContextMenu,
-        // position, setPosition,
-
-        // edidingMessage, setEditingMessage,
-        editMessage,
-
-        deleteMessage,
-
         closeChat,
     } = useChat();
     
@@ -49,22 +36,6 @@ export default function ChatsPage() {
                     room={room} 
 
                     getMessageFromAdmin={getMessageFromAdmin}
-                    
-                    repliedMessage={repliedMessage}
-                    setRepliedMessage={setRepliedMessage}
-                    onReplyMessage={onReplyMessage}
-                    cancelReplyMessage={cancelReplyMessage}
-
-                    // position={position}
-                    // setPosition={setPosition}
-                    // contextMenu={contextMenu} 
-                    // setContextMenu={setContextMenu}
-
-                    // edidingMessage={edidingMessage} 
-                    // setEditingMessage={setEditingMessage}
-                    editMessage={editMessage}
-
-                    deleteMessage={deleteMessage}
                 />
             </main>
         </div>

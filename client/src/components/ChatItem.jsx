@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { X, Trash2, UserRoundX } from 'lucide-react';
 
-export default function ChatItem({ username, id, goToChat, room, closeChat, contextMenu, setContextMenu }) {
+export default function ChatItem({ 
+    username, 
+    id, 
+    goToChat, 
+    room, 
+    closeChat, 
+    contextMenu, 
+    setContextMenu 
+}) {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const contextMenuOpen = (ev) => {
         ev.preventDefault();
