@@ -7,13 +7,13 @@ import Message from './Message';
 export default function Chat({ messages, room, getMessageFromAdmin }) {
     return (
         <>
-            {!room ? (
+            {(!room || messages[room] === undefined) ? (
                 <div className='w-[80%] h-full flex justify-center items-center'>
                     <h2 className='text-[20px] font-[Ubuntu] font-[400] text-[#AAAAAA] bg-[#222222] pr-[50px] pl-[50px] pt-[2px] pb-[2px] rounded-[20px]'>
                         Choose chat, to start conversation
                     </h2>
                 </div>
-            ) : messages[room].length === 0 ? (
+            ) : (messages[room].length === 0 ) ? (
                 <div className='w-[80%] h-full flex justify-center items-center'>
                     <h2 className='text-[20px] font-[Ubuntu] font-[400] text-[#AAAAAA] bg-[#222222] pr-[50px] pl-[50px] pt-[2px] pb-[2px] rounded-[20px]'>
                         Chat is empty

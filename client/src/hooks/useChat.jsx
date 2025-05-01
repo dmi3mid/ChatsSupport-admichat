@@ -25,6 +25,11 @@ export default function useChat() {
 
 
     const closeChat = async (closedChat) => {
+        setMessages(prev => {
+            const updated = { ...prev };
+            delete updated[room];
+            return;
+        });
         setChats(prevChats =>
             prevChats.map(chat =>
                 chat.roomId === closedChat
@@ -32,6 +37,7 @@ export default function useChat() {
                     : chat
             )
         );
+        setRoom(0)
         const response = await axios.post('http://localhost:2800/closeChat', {isOpened: false}, {
             headers: {  
                 roomId: closedChat,
@@ -108,20 +114,22 @@ export default function useChat() {
             }));
         });
 
-        socket.on('call', (data) => {
-            const parsedData = JSON.parse(data);
-            console.log(parsedData);
-            const newchat = {
-                roomId: parsedData._id,
-                username: parsedData.username,
-                isOpened: parsedData.isOpened,
-            }
-            setChats(prev => {
-                if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
-                return [...prev, newchat];
-            });
+        // socket.on('call', (data) => {
+        //     const parsedData = JSON.parse(data);
+        //     console.log(parsedData);
+        //     setRoom(parsedData._id);
+        //     const newchat = {
+        //         roomId: parsedData._id,
+        //         username: parsedData.username,
+        //         isOpened: parsedData.isOpened,
+        //     }
+        //     console.log(newchat);
+        //     setChats(prev => {
+        //         if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
+        //         return [...prev, newchat];
+        //     });
             
-        })
+        // })
 
         
         return () => {
