@@ -45,6 +45,7 @@ export default function useChat() {
         const getUsers = async () => {
             const response = await axios.get('http://localhost:2800/getUsers');
             const usersData = response.data;
+            console.log(usersData);
             usersData.forEach((user) => {
                 const newchat = {
                     roomId: user._id,
@@ -92,6 +93,7 @@ export default function useChat() {
 
         socket.on('user-message', (data) => {
             const parsedData = JSON.parse(data);
+            console.log(parsedData);
             setMessages(prev => ({
                 ...prev,
                 [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
