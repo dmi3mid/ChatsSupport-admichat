@@ -83,75 +83,8 @@ app.post('/closeChat', async (req, res) => {
             }
         }
         await users.updateOne(filters, updatedData);
-        if (connections.get(`user-${headers.roomid}`)) {
-            io.to(connections.get(`user-${headers.roomid}`)).emit('admin-closed-chat', JSON.stringify({
-                from_admin: true,
-                username: "admi3chatbot",
-                date: Date.now(),
-                text: "The admin has closed your chat. To get another help send call"
-            }));
-        } else {
-            await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
-        }
+        await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
     } catch (error) {
         console.log(error);
     }
-})
-
-
-
-app.get('/getBotToken', async (req, res) => {
-    try {
-        const filters = {
-            username: req.headers.username || "Unknown user"
-        }
-        const adminData = await admins.findOne(filters);
-        res.send(JSON.stringify({ token: adminData.token }));
-    } catch (error) {
-        console.log(error);
-    }
-});
-app.post('/setBotToken', async (req, res) => {
-    try {
-        const headers = req.headers
-        const adminData = {
-            username: headers.username
-        }
-        const newToken = req.body.token;
-
-        const pathToFile = path.join(__dirname, ".env");
-        const envContent = await promiseReadFile(pathToFile);
-        const envVars = {};
-        envContent.split('\n').forEach(line => {
-            const [key, value] = line.split('=');
-            if (key) {
-                envVars[key.trim()] = value ? value.trim() : '';
-            }
-        });
-        console.log(newToken);
-        envVars["BOT_TOKEN"] = newToken;
-
-        const newEnvContent = Object.entries(envVars)
-            .map(([key, value]) => `${key}=${value}`)
-            .join('\n');
-
-        // console.log(newEnvContent);
-        // const writer = await promiseWriteFile(pathToFile, newEnvContent);
-
-
-        const filters = {
-            username: adminData.username
-        }
-        const updatedData = {
-            $set: {
-                token: newToken
-            }
-        }
-        await admins.updateOne(filters, updatedData);
-    } catch (error) {
-        console.log(error);
-    }
-});
-app.post('/removeBotToken', async (req, res) => {
-
 });

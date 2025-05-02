@@ -1,6 +1,6 @@
 module.exports = async function onText(msg, io, connections, messages) {
     try {
-        if (!msg.text === '/call') {
+        if (msg.text !== '/call') {
             const message = {
                 room_id: msg.from.id,
                 from_admin: false,
