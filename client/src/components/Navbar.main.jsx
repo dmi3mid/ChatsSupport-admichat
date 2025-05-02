@@ -7,12 +7,15 @@ export default function NavbarMain() {
     const goToSettings = () => {
         navigate('/settings');
     }
+    const goToProfile = () => {
+        navigate('/profile');
+    }
     return (
         <nav className='flex justify-evenly items-center w-[25%] pt-[50px] pb-[50px]'>
             <a href="" className='flex justify-center items-center w-[60px] h-[60px] rounded-[10px] duration-300 hover:bg-[#2e282e]'>
                 <MessageSquareMore color='#4afff6' width={50} height={50}/>
             </a>
-            <a href="" className='flex justify-center items-center w-[60px] h-[60px] rounded-[10px] duration-300 hover:bg-[#2e282e]'>
+            <a onClick={goToProfile} href="" className='flex justify-center items-center w-[60px] h-[60px] rounded-[10px] duration-300 hover:bg-[#2e282e]'>
                 <User color='#4afff6' width={50} height={50}/>
             </a>
             <a onClick={goToSettings} href="" className='flex justify-center items-center w-[60px] h-[60px] rounded-[10px] duration-300 hover:bg-[#2e282e]'>

@@ -29,8 +29,13 @@ const admins = client.db("admichat").collection("admins");
 
 const { initWsConnection } = require('./chat/chat');
 const { initBot } = require('./bot/bot');
-const { initAuth } = require('./authorization/authorization');
+const { initAuth, register, login, getProfile } = require('./authorization/authorization');
 const { promiseReadFile, promiseWriteFile } = require('./filesMethods/filesMethods');
+
+// Add these routes before the start() function
+app.post('/api/auth/register', register);
+app.post('/api/auth/login', login);
+app.get('/api/auth/profile', getProfile);
 
 async function start() {
     try {
