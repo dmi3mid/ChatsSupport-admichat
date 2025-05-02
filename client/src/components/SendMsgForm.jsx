@@ -7,15 +7,19 @@ import isEmptyObj from '../utils/isEmptyObj';
 
 export default function SendMsgForm({ getMessageFromAdmin }) {
     const [textMessage, setTextMessage] = useState('');
-    const message = {
-        from_admin: true,
-        username: "admi3chatbot",
-        date: Date.now(),
-        text: textMessage,
-    };
+    
     const sendMessage = (ev) => {
         ev.preventDefault();
         if (textMessage.trim() === "") return;
+        
+        const message = {
+            text: textMessage,
+            from_admin: true,
+            username: "Admin",
+            date: new Date(),
+            is_bot_msg: false
+        };
+        
         getMessageFromAdmin(message);
         setTextMessage('');
     }

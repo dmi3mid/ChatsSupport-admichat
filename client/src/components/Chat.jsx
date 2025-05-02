@@ -4,7 +4,7 @@ import SendMsgForm from './SendMsgForm';
 import Message from './Message';
 
 
-export default function Chat({ messages, room, getMessageFromAdmin }) {
+export default function Chat({ messages, room, getMessageFromAdmin, error }) {
     return (
         <>
             {(!room || messages[room] === undefined) ? (
@@ -13,7 +13,7 @@ export default function Chat({ messages, room, getMessageFromAdmin }) {
                         Choose chat, to start conversation
                     </h2>
                 </div>
-            ) : (messages[room].length === 0 ) ? (
+            ) : (messages[room].length === 0) ? (
                 <div className='w-[80%] h-full flex justify-center items-center'>
                     <h2 className='text-[20px] font-[Ubuntu] font-[400] text-[#AAAAAA] bg-[#222222] pr-[50px] pl-[50px] pt-[2px] pb-[2px] rounded-[20px]'>
                         Chat is empty
@@ -21,6 +21,11 @@ export default function Chat({ messages, room, getMessageFromAdmin }) {
                 </div>
             ) : (
                 <div id='Chat' className='w-[80%] h-full flex flex-col'>
+                    {error && (
+                        <div className='bg-red-500 text-white p-2 m-2 rounded'>
+                            {error}
+                        </div>
+                    )}
                     <div className='flex flex-col h-full overflow-y-auto'>
                         {messages[room].map((msg, idx) => (
                             <Message

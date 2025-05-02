@@ -1,22 +1,45 @@
 module.exports = async function onAdminMsg(io, connections, socket, data, bot, messages) {
     try {
-        let messageFromAdmin;
-        const parsedData = JSON.parse(data); // message and room
-        messageFromAdmin = parsedData.message;
-        if (connections.get(`user-${parsedData.room}`)) {
-            console.log(parsedData.room);
-            messageFromAdmin.room_id = parsedData.room;
-            const jsonMessage = JSON.stringify(messageFromAdmin);
-            io.to(connections.get(`user-${parsedData.room}`)).emit('admin-message', jsonMessage);
+        const parsedData = JSON.parse(data);
+        console.log('Received Telegram message:', parsedData);
+        
+        const { room, message } = parsedData;
+        
+        // Validate required fields
+        if (!message.text) {
+            throw new Error('Message text is required');
+        }
+
+        // Check if user is connected via WebSocket
+        const userSocketId = connections.get(`user-${room}`);
+        if (userSocketId) {
+            console.log('User connected via WebSocket, sending message to room:', room);
+            message.room_id = room;
+            const jsonMessage = JSON.stringify(message);
+            io.to(userSocketId).emit('admin-message', jsonMessage);
         } else {
-            const sentMsgFromAdmin = await bot.sendMessage(parsedData.room, messageFromAdmin.text);
-            // messageFromAdmin.message_id = sentMsgFromAdmin.message_id;
-            messageFromAdmin.room_id = sentMsgFromAdmin.chat.id;
-        } 
-        const jsonMessage = JSON.stringify({ message: messageFromAdmin, roomId: parsedData.room });
-        socket.emit("updated-admin-message", jsonMessage);
-        await messages.insertOne(messageFromAdmin);
+            console.log('Sending message to Telegram chat:', room);
+            // Send message to Telegram
+            const sentMsgFromAdmin = await bot.sendMessage(room, message.text);
+            message.room_id = sentMsgFromAdmin.chat.id;
+        }
+
+        // Save message to database
+        await messages.insertOne(message);
+
+        // Confirm to admin
+        const confirmMessage = JSON.stringify({
+            message,
+            roomId: room,
+            status: 'sent'
+        });
+        socket.emit("updated-admin-message", confirmMessage);
+
     } catch (error) {
-        console.log(error);
+        console.error('Telegram message error:', error);
+        socket.emit('admin-message-error', {
+            error: error.message || 'Failed to send message',
+            roomId: parsedData?.room
+        });
     }
 }

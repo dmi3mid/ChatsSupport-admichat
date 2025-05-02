@@ -11,6 +11,7 @@ export default function ChatsPage() {
         chats, setChats,
         messages, setMessages,
         room, setRoom,
+        error,
 
         goToChat,
         getMessageFromAdmin,
@@ -36,6 +37,7 @@ export default function ChatsPage() {
                     room={room} 
 
                     getMessageFromAdmin={getMessageFromAdmin}
+                    error={error}
                 />
             </main>
         </div>
