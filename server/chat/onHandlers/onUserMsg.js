@@ -3,7 +3,7 @@ module.exports = async function onUserTelegramMsg(io, connections, data, message
         const parsedData = JSON.parse(data);
         console.log('Received Telegram user message:', parsedData);
 
-        // Save message in unified schema
+        // Save message in unified schema, but only if not already present
         const formattedMessage = {
             room_id: parsedData.room_id,
             from_admin: false,
@@ -13,7 +13,19 @@ module.exports = async function onUserTelegramMsg(io, connections, data, message
             text: parsedData.text,
             is_bot_msg: true
         };
-        await messages.insertOne(formattedMessage);
+
+        // Check for duplicate in DB before insert
+        const duplicate = await messages.findOne({
+            room_id: formattedMessage.room_id,
+            message_id: formattedMessage.message_id,
+            text: formattedMessage.text
+        });
+        if (!duplicate) {
+            console.log('Saving user message:', formattedMessage);
+            await messages.insertOne(formattedMessage);
+        } else {
+            console.log('Duplicate user message detected, not saving:', formattedMessage);
+        }
 
         // Forward to admin
         const adminSocketId = connections.get(`admin-${parsedData.room_id}`);
