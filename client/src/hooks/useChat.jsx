@@ -109,16 +109,10 @@ export default function useChat() {
                 const response = await axios.get('http://localhost:2800/getMessages');
                 const messagesData = response.data;
                 messagesData.forEach((message) => {
-                    setMessages(prev => {
-                        const msgs = prev[message.room_id] || [];
-                        if (msgs.some(m => m.message_id === message.message_id && m.text === message.text)) {
-                            return prev;
-                        }
-                        return {
-                            ...prev,
-                            [message.room_id]: [...msgs, message]
-                        };
-                    });
+                    setMessages(prev => ({
+                        ...prev,
+                        [message.room_id]: [...(prev[message.room_id] || []), message]
+                    }));
                 });
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -222,7 +216,7 @@ export default function useChat() {
                     const { message, roomId } = parsedData;
                     setMessages(prev => {
                         const msgs = prev[roomId] || [];
-                        if (msgs.some(m => m.message_id === message.message_id && m.text === message.text)) {
+                        if (msgs.some(m => m.message_id && m.message_id === message.message_id && m.text === message.text)) {
                             return prev;
                         }
                         return {
@@ -236,7 +230,7 @@ export default function useChat() {
                     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
                     setMessages(prev => {
                         const msgs = prev[parsedData.room_id] || [];
-                        if (msgs.some(m => m.message_id === parsedData.message_id && m.text === parsedData.text)) {
+                        if (msgs.some(m => m.message_id && m.message_id === parsedData.message_id && m.text === parsedData.text)) {
                             return prev;
                         }
                         return {
@@ -261,7 +255,7 @@ export default function useChat() {
                     if (parsedData.status === 'sent') {
                         setMessages(prev => {
                             const msgs = prev[parsedData.roomId] || [];
-                            if (msgs.some(m => m.message_id === parsedData.message.message_id && m.text === parsedData.message.text)) {
+                            if (msgs.some(m => m.message_id && m.message_id === parsedData.message.message_id && m.text === parsedData.message.text)) {
                                 return prev;
                             }
                             return {

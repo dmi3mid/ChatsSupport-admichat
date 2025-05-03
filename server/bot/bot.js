@@ -4,6 +4,9 @@ const onCall = require('./onHandlers/onCall');
 
 
 function initBot(bot, io, users, messages, connections) {
+    if (bot._handlersInitialized) return;
+    bot._handlersInitialized = true;
+
     bot.onText(/\/start/, (msg) => {
         onStart(msg, bot, io, users);
     });   
