@@ -20,22 +20,22 @@ export default function App() {
         {/* Protected routes */}
         <Route path="/" element={
           <ProtectedRoute>
-            <MainPage />
+          <MainPage />
           </ProtectedRoute>
         } />
         <Route path="/chats" element={
           <ProtectedRoute>
-            <ChatsPage />
+          <ChatsPage />
           </ProtectedRoute>
         } />
         <Route path="/settings" element={
           <ProtectedRoute>
-            <SettingsPage />
+          <SettingsPage />
           </ProtectedRoute>
         } />
         <Route path="/profile" element={
           <ProtectedRoute>
-            <ProfilePage />
+          <ProfilePage />
           </ProtectedRoute>
         } />
 

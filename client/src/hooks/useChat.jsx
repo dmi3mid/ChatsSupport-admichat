@@ -7,23 +7,31 @@ export default function useChat() {
     const [messages, setMessages] = useState({0:[]});
     const [room, setRoom] = useState(0);
     const [error, setError] = useState(null);
+    const [isConnected, setIsConnected] = useState(false);
 
     const socketRef = useRef(null);
 
-    const goToChat = (roomId) => {
+    const goToChat = async (roomId) => {
         setRoom(roomId);
-        // Join room as admin
-        socketRef.current.emit('join-room', JSON.stringify({
-            roomId,
-            isAdmin: true
-        }));
         setMessages(prev => ({
             ...prev,
             [roomId]: prev[roomId] || []
         }));
-    }
+        // Join room as admin
+        if (socketRef.current && isConnected) {
+            socketRef.current.emit('join-room', JSON.stringify({
+                roomId,
+                isAdmin: true
+            }));
+        }
+    };
 
     const getMessageFromAdmin = (message) => {
+        if (!socketRef.current || !isConnected) {
+            setError('Not connected to server. Please try again.');
+            return;
+        }
+
         setError(null);
         if (!room) {
             setError('No chat selected');
@@ -44,6 +52,11 @@ export default function useChat() {
     };
 
     const closeChat = async (closedChat) => {
+        if (!socketRef.current || !isConnected) {
+            setError('Not connected to server. Please try again.');
+            return;
+        }
+
         setMessages(prev => {
             const updated = { ...prev };
             delete updated[room];
@@ -90,7 +103,7 @@ export default function useChat() {
                 setError('Failed to load chats');
             }
         };
-
+        
         const getMessages = async () => {
             try {
                 const response = await axios.get('http://localhost:2800/getMessages');
@@ -106,80 +119,178 @@ export default function useChat() {
                 setError('Failed to load messages');
             }
         };
-    
+
         getUsers();
         getMessages();
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:2800');
-        socketRef.current = socket;
-        
-        socket.on('room-joined', (data) => {
-            console.log('Joined room:', data);
-        });
+        const initializeSocket = async () => {
+            try {
+                // Parse user object from localStorage
+                const userStr = localStorage.getItem('user');
+                let adminId = null, email = null, username = null;
+                if (userStr) {
+                    try {
+                        const userObj = JSON.parse(userStr);
+                        adminId = userObj.id;
+                        email = userObj.email;
+                        username = userObj.username;
+                    } catch (e) {
+                        console.error('Failed to parse user from localStorage:', e, userStr);
+                    }
+                }
+                console.log('Parsed user:', { adminId, email, username });
 
-        socket.on('room-join-error', (data) => {
-            console.error('Room join error:', data);
-            setError(data.error);
-        });
+                if (!adminId || !email || !username) {
+                    setError('Authentication required. Please log in again.');
+                    return;
+                }
 
-        socket.on('start', (data) => {
-            const parsedData = JSON.parse(data);
-            const newchat = {
-                roomId: parsedData._id,
-                username: parsedData.username,
-                isOpened: parsedData.isOpened,
-            };
+                // Initialize socket connection
+                const socket = io('http://localhost:2800', {
+                    auth: {
+                        adminId: adminId,
+                        email: email,
+                        username: username
+                    },
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000
+                });
 
-            setChats(prev => {
-                if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
-                return [...prev, newchat];
-            });
-        });
+                socketRef.current = socket;
+                
+                socket.on('connect', () => {
+                    console.log('Socket connected successfully:', {
+                        socketId: socket.id,
+                        adminId,
+                        email,
+                        username
+                    });
+                    setIsConnected(true);
+                    setError(null);
+                });
 
-        socket.on('user-message', (data) => {
-            const parsedData = JSON.parse(data);
-            setMessages(prev => ({
-                ...prev,
-                [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
-            }));
-        });
+                socket.on('connect_error', (error) => {
+                    console.error('Socket connection error:', {
+                        error: error.message,
+                        adminId,
+                        email,
+                        username
+                    });
+                    setError('Failed to connect to server. Please try again.');
+                    setIsConnected(false);
+                });
 
-        socket.on('admin-message', (data) => {
-            const parsedData = JSON.parse(data);
-            setMessages(prev => ({
-                ...prev,
-                [parsedData.room_id]: [...(prev[parsedData.room_id] || []), parsedData]
-            }));
-        });
+                socket.on('disconnect', () => {
+                    console.log('Socket disconnected');
+                    setIsConnected(false);
+                });
 
-        socket.on('admin-message-error', (data) => {
-            console.error('Admin message error:', data);
-            setError(data.error);
-        });
+                socket.on('room-joined', (data) => {
+                    console.log('Joined room:', data);
+                });
 
-        socket.on('user-message-error', (data) => {
-            console.error('User message error:', data);
-            setError(data.error);
-        });
+                socket.on('room-join-error', (data) => {
+                    console.error('Room join error:', data);
+                    setError(data.error);
+                });
+                
+                socket.on('start', (data) => {
+                    const parsedData = JSON.parse(data);
+                    const newchat = {
+                        roomId: parsedData._id,
+                        username: parsedData.username,
+                        isOpened: parsedData.isOpened,
+                    };
 
-        socket.on('updated-admin-message', (data) => {
-            const parsedData = JSON.parse(data);
-            if (parsedData.status === 'sent') {
-                setMessages(prev => ({
-                    ...prev,
-                    [parsedData.roomId]: [...(prev[parsedData.roomId] || []), parsedData.message]
-                }));
+                    setChats(prev => {
+                        if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
+                        return [...prev, newchat];
+                    });
+                });
+
+                socket.on('user-message', (data) => {
+                    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+                    const { message, roomId } = parsedData;
+                    setMessages(prev => {
+                        const msgs = prev[roomId] || [];
+                        if (msgs.some(m => m.message_id && m.message_id === message.message_id && m.text === message.text)) {
+                            return prev;
+                        }
+                        return {
+                            ...prev,
+                            [roomId]: [...msgs, message]
+                        };
+                    });
+                });
+
+                socket.on('admin-message', (data) => {
+                    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+                    setMessages(prev => {
+                        const msgs = prev[parsedData.room_id] || [];
+                        if (msgs.some(m => m.message_id && m.message_id === parsedData.message_id && m.text === parsedData.text)) {
+                            return prev;
+                        }
+                        return {
+                            ...prev,
+                            [parsedData.room_id]: [...msgs, parsedData]
+                        };
+                    });
+                });
+
+                socket.on('admin-message-error', (data) => {
+                    console.error('Admin message error:', data);
+                    setError(data.error);
+                });
+
+                socket.on('user-message-error', (data) => {
+                    console.error('User message error:', data);
+                    setError(data.error);
+                });
+
+                socket.on('updated-admin-message', (data) => {
+                    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+                    if (parsedData.status === 'sent') {
+                        setMessages(prev => {
+                            const msgs = prev[parsedData.roomId] || [];
+                            if (msgs.some(m => m.message_id && m.message_id === parsedData.message.message_id && m.text === parsedData.message.text)) {
+                                return prev;
+                            }
+                            return {
+                                ...prev,
+                                [parsedData.roomId]: [...msgs, parsedData.message]
+                            };
+                        });
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error initializing socket:', error);
+                setError('Failed to initialize connection. Please try again.');
+                setIsConnected(false);
             }
-        });
-        
+        };
+
+        initializeSocket();
+
         return () => {
-            socket.disconnect();
+            console.log('Cleaning up socket connection');
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+            setIsConnected(false);
         };
     }, []);
 
     const sendUserMessage = (message) => {
+        if (!socketRef.current || !isConnected) {
+            setError('Not connected to server. Please try again.');
+            return;
+        }
+
         setError(null);
         if (!room) {
             setError('No chat selected');
@@ -201,6 +312,7 @@ export default function useChat() {
         messages,
         room,
         error,
+        isConnected,
         goToChat,
         getMessageFromAdmin,
         closeChat,

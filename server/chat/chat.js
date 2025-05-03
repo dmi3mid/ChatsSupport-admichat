@@ -6,7 +6,7 @@ const onJoinRoom = require('./onHandlers/onJoinRoom');
 const onAdminClosedChat = require('./onHandlers/onAdminClosedChat');
 const onStart = require('./onHandlers/onHandlersWeb/onStart');
 
-function initWsConnection(io, connections, app, bot, users, messages) {
+function initWsConnection(io, connections, app, bot, users, messages, admins) {
     io.on('connection', async (socket) => {
         console.log("Connection via socket.io");
     
@@ -25,7 +25,7 @@ function initWsConnection(io, connections, app, bot, users, messages) {
                 onAdminWebMsg(io, connections, socket, data, messages);
             } else {
                 console.log('Routing to Telegram admin handler');
-                onAdminTelegramMsg(io, connections, socket, data, bot, messages);
+                onAdminTelegramMsg(io, connections, socket, data, bot, messages, admins);
             }
         });
 
