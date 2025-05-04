@@ -5,6 +5,7 @@ const onUserWebMsg = require('./onHandlers/onHandlersWeb/onUserMsg');
 const onJoinRoom = require('./onHandlers/onJoinRoom');
 const onAdminClosedChat = require('./onHandlers/onAdminClosedChat');
 const onStart = require('./onHandlers/onHandlersWeb/onStart');
+const onCall = require('./onHandlers/onHandlersWeb/onCall');
 
 function initWsConnection(io, connections, app, bot, users, messages, admins) {
     io.on('connection', async (socket) => {
@@ -22,6 +23,11 @@ function initWsConnection(io, connections, app, bot, users, messages, admins) {
                 console.log('Registered user socket for roomId:', parsedData.roomId, 'socketId:', socket.id);
             }
             onJoinRoom(socket, connections, data);
+        });
+    
+        // Add handler for 'call' event (web chat)
+        socket.on('call', (data) => {
+            onCall(io, connections, data, users);
         });
     
         // Handle admin messages based on context
