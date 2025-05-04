@@ -100,6 +100,7 @@ const client = new MongoClient("mongodb://localhost:27017/");
 const users = client.db("admichat").collection("users");
 const messages = client.db("admichat").collection("messages");
 const admins = client.db("admichat").collection("admins");
+const settings = client.db("admichat").collection("settings");
 
 const { initWsConnection } = require('./chat/chat');
 const { initBot } = require('./bot/bot');
@@ -225,6 +226,13 @@ async function start() {
         });
         await client.connect();
         console.log("Database is connected");
+
+        // Ensure roundRobin doc exists
+        await settings.updateOne(
+            { _id: 'roundRobin' },
+            { $setOnInsert: { lastAssignedAdminIndex: -1 } },
+            { upsert: true }
+        );
 
         // Initialize WebSocket connection with bot manager
         initWsConnection(io, connections, app, { getBotByToken }, users, messages, admins);

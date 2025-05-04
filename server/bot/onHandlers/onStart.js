@@ -9,11 +9,28 @@ module.exports = async function (msg, bot, io, users, admins, messages) {
             _id: msg.from.id,
             username: msg?.from?.username || msg?.from?.first_name || `user${msg.from.id}`,
             isOpened: true
+        };
+
+        // --- ROUND ROBIN ASSIGNMENT ---
+        const settings = users.s.db.collection('settings');
+        const allAdmins = await admins.find({ isActive: { $ne: false } }).sort({ _id: 1 }).toArray();
+        if (!allAdmins.length) {
+            console.log('No admins available for assignment');
+            return;
         }
-        const jsonData = JSON.stringify(user);
-        io.emit('start', jsonData);
-        if (!await users.findOne({ _id: userId })) users.insertOne(user);
-        else console.log("Users already in database");
+        const settingsDoc = await settings.findOne({ _id: 'roundRobin' });
+        const lastIndex = settingsDoc ? settingsDoc.lastAssignedAdminIndex : -1;
+        const nextIndex = (lastIndex + 1) % allAdmins.length;
+        const assignedAdmin = allAdmins[nextIndex];
+        // Assign to user
+        user.assignedAdminId = assignedAdmin._id;
+        await users.updateOne({ _id: userId }, { $set: user }, { upsert: true });
+        // Update roundRobin
+        await settings.updateOne({ _id: 'roundRobin' }, { $set: { lastAssignedAdminIndex: nextIndex } });
+        // Only emit to assigned admin (emit to a room named after adminId)
+        io.to(String(assignedAdmin._id)).emit('start', JSON.stringify(user));
+
+        // --- END ROUND ROBIN ---
 
         // Fetch admin's auto-reply and send it
         const admin = await admins.findOne({ botToken: bot.token });

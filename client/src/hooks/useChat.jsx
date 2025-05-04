@@ -11,6 +11,12 @@ export default function useChat() {
 
     const socketRef = useRef(null);
 
+    // Helper to get adminId from localStorage
+    const getAdminId = () => {
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr).id : null;
+    };
+
     const goToChat = async (roomId) => {
         setRoom(roomId);
         setMessages(prev => ({
@@ -91,12 +97,15 @@ export default function useChat() {
             try {
                 const response = await axios.get('http://localhost:2800/getUsers');
                 const usersData = response.data;
+                const adminId = getAdminId();
                 usersData.forEach((user) => {
+                    // Only add chats assigned to this admin
+                    if (user.assignedAdminId && String(user.assignedAdminId) !== String(adminId)) return;
                     const newchat = {
                         roomId: user._id,
                         username: user.username,
                         isOpened: user.isOpened,
-                    }
+                    };
                     setChats(prev => {
                         if (prev.find(chat => chat.roomId === newchat.roomId)) return prev;
                         return [...prev, newchat];
