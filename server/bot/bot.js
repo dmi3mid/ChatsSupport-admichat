@@ -3,12 +3,12 @@ const onText = require('./onHandlers/onText');
 const onCall = require('./onHandlers/onCall');
 
 
-function initBot(bot, io, users, messages, connections) {
+function initBot(bot, io, users, messages, connections, admins) {
     if (bot._handlersInitialized) return;
     bot._handlersInitialized = true;
 
     bot.onText(/\/start/, (msg) => {
-        onStart(msg, bot, io, users);
+        onStart(msg, bot, io, users, admins, messages);
     });   
     
     bot.on('text', (msg) => {

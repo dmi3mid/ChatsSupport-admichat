@@ -56,6 +56,10 @@ export default function useChat() {
             setError('Not connected to server. Please try again.');
             return;
         }
+        socketRef.current.emit('admin-closed-chat', JSON.stringify({
+            roomId: closedChat,
+            isAdmin: true
+        }));
 
         setMessages(prev => {
             const updated = { ...prev };

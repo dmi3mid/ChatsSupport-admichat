@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import useToken from '../hooks/useToken';
+import axios from 'axios';
 
 export default function SettingsPage() {
     const {
@@ -11,6 +12,65 @@ export default function SettingsPage() {
         error,
         loading
     } = useToken();
+
+    // Auto-reply state
+    const [autoReply, setAutoReply] = useState('');
+    const [autoReplyInput, setAutoReplyInput] = useState('');
+    const [autoReplyLoading, setAutoReplyLoading] = useState(false);
+    const [autoReplyError, setAutoReplyError] = useState('');
+    const [autoReplySuccess, setAutoReplySuccess] = useState('');
+    const [autoReplyPreview, setAutoReplyPreview] = useState('');
+
+    // Helper to get adminId from localStorage
+    const getAdminId = () => {
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr).id : null;
+    };
+
+    // Fetch auto-reply on mount
+    useEffect(() => {
+        const fetchAutoReply = async () => {
+            setAutoReplyLoading(true);
+            setAutoReplyError('');
+            try {
+                const adminId = getAdminId();
+                const res = await axios.get('http://localhost:2800/api/settings/auto-reply', {
+                    headers: { 'admin-id': adminId }
+                });
+                setAutoReply(res.data.autoReplyStart || '');
+                setAutoReplyInput(res.data.autoReplyStart || '');
+                setAutoReplyPreview(res.data.autoReplyStart || '');
+            } catch (err) {
+                setAutoReplyError('Failed to fetch auto-reply');
+            } finally {
+                setAutoReplyLoading(false);
+            }
+        };
+        fetchAutoReply();
+    }, []);
+
+    // Save auto-reply
+    const saveAutoReply = async (e) => {
+        e.preventDefault();
+        setAutoReplyLoading(true);
+        setAutoReplyError('');
+        setAutoReplySuccess('');
+        try {
+            const adminId = getAdminId();
+            await axios.post('http://localhost:2800/api/settings/auto-reply', {
+                autoReplyStart: autoReplyInput
+            }, {
+                headers: { 'admin-id': adminId }
+            });
+            setAutoReply(autoReplyInput);
+            setAutoReplySuccess('Auto-reply saved!');
+            setAutoReplyPreview(autoReplyInput);
+        } catch (err) {
+            setAutoReplyError('Failed to save auto-reply');
+        } finally {
+            setAutoReplyLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#1b1b1b] text-white p-8">
@@ -65,6 +125,47 @@ export default function SettingsPage() {
                             </button>
                         </form>
                     )}
+                </div>
+
+                {/* Auto-reply block */}
+                <div className="bg-[#222222] rounded-lg p-6 mb-6">
+                    <h2 className="text-xl font-semibold mb-4">Auto-Reply Message for /start</h2>
+                    <form onSubmit={saveAutoReply} className="space-y-4">
+                        <div>
+                            <label htmlFor="autoReply" className="block text-gray-300 mb-2">
+                                Enter your auto-reply message (use double newlines for multiple messages):
+                            </label>
+                            <textarea
+                                id="autoReply"
+                                value={autoReplyInput}
+                                onChange={e => setAutoReplyInput(e.target.value)}
+                                rows={4}
+                                className="w-full bg-[#1b1b1b] text-white p-3 rounded border border-gray-600 focus:border-[#00e4d8] focus:outline-none"
+                                placeholder="Welcome! How can I help you today?"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={autoReplyLoading}
+                            className="bg-[#00e4d8] hover:bg-[#4afff6] text-black px-4 py-2 rounded disabled:opacity-50"
+                        >
+                            {autoReplyLoading ? 'Saving...' : 'Save Auto-Reply'}
+                        </button>
+                        {autoReplyError && (
+                            <div className="bg-red-500 text-white p-3 rounded mt-2">{autoReplyError}</div>
+                        )}
+                        {autoReplySuccess && (
+                            <div className="bg-green-500 text-white p-3 rounded mt-2">{autoReplySuccess}</div>
+                        )}
+                    </form>
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold mb-2">Preview:</h3>
+                        <div className="bg-[#1b1b1b] p-3 rounded border border-gray-600">
+                            {autoReplyPreview.split('\n\n').map((msg, idx) => (
+                                <div key={idx} className="mb-2 whitespace-pre-line">{msg}</div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <div className="bg-[#222222] rounded-lg p-6">

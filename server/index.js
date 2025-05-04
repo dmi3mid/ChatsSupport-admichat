@@ -149,7 +149,7 @@ app.post('/setBotToken', async (req, res) => {
         if (botInstance) {
             // Initialize bot handlers for this instance (only once)
             if (!botInstance._initialized) {
-                initBot(botInstance, io, users, messages, connections);
+                initBot(botInstance, io, users, messages, connections, admins);
                 botInstance._initialized = true;
             }
             res.json({ success: true, message: 'Bot token updated successfully' });
@@ -185,6 +185,39 @@ app.get('/getBotToken', async (req, res) => {
     }
 });
 
+const DEFAULT_AUTO_REPLY_START = "Welcome! How can I help you today?";
+
+app.get('/api/settings/auto-reply', async (req, res) => {
+    try {
+        const adminId = req.headers['admin-id'];
+        if (!adminId) return res.status(400).json({ error: 'Admin ID is required' });
+        let admin = await admins.findOne({ _id: new ObjectId(adminId) });
+        if (!admin) return res.status(404).json({ error: 'Admin not found' });
+        if (!admin.autoReplyStart) {
+            await admins.updateOne({ _id: new ObjectId(adminId) }, { $set: { autoReplyStart: DEFAULT_AUTO_REPLY_START } });
+            admin.autoReplyStart = DEFAULT_AUTO_REPLY_START;
+        }
+        res.json({ autoReplyStart: admin.autoReplyStart });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get auto-reply' });
+    }
+});
+
+app.post('/api/settings/auto-reply', async (req, res) => {
+    try {
+        const adminId = req.headers['admin-id'];
+        const { autoReplyStart } = req.body;
+        if (!adminId) return res.status(400).json({ error: 'Admin ID is required' });
+        await admins.updateOne(
+            { _id: new ObjectId(adminId) },
+            { $set: { autoReplyStart: autoReplyStart || DEFAULT_AUTO_REPLY_START } }
+        );
+        res.json({ success: true, message: 'Auto-reply updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to set auto-reply' });
+    }
+});
+
 async function start() {
     try {
         httpServer.listen(2800, () => {
@@ -202,7 +235,7 @@ async function start() {
             if (admin.botToken) {
                 const botInstance = await getBotInstance(admin.botToken);
                 if (botInstance) {
-                    initBot(botInstance, io, users, messages, connections);
+                    initBot(botInstance, io, users, messages, connections, admins);
                 }
             }
         }
@@ -250,7 +283,7 @@ app.post('/closeChat', async (req, res) => {
             }
         }
         await users.updateOne(filters, updatedData);
-        await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
+        // await bot.sendMessage(Number(headers.roomid), "The admin has closed your chat. To get another help send /call");
     } catch (error) {
         console.log(error);
     }

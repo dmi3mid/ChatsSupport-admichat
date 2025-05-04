@@ -30,6 +30,7 @@ function initWsConnection(io, connections, app, bot, users, messages, admins) {
         });
 
         socket.on('admin-closed-chat', async (data) => {
+            console.log('Received admin closed chat:', data);
             onAdminClosedChat(io, connections, data, bot)
         });
         
