@@ -64,7 +64,7 @@ export default function useChat() {
         }
         socketRef.current.emit('admin-closed-chat', JSON.stringify({
             roomId: closedChat,
-            isAdmin: true
+            adminId: getAdminId()
         }));
 
         setMessages(prev => {
