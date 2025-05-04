@@ -11,6 +11,16 @@ function initWsConnection(io, connections, app, bot, users, messages, admins) {
         console.log("Connection via socket.io");
     
         socket.on("join-room", (data) => {
+            // Parse data to get roomId (user's _id for web chat)
+            let parsedData = data;
+            if (typeof data === 'string') {
+                parsedData = JSON.parse(data);
+            }
+            // Register the user's socket for web chat
+            if (parsedData && parsedData.roomId) {
+                connections.set(String(parsedData.roomId), socket);
+                console.log('Registered user socket for roomId:', parsedData.roomId, 'socketId:', socket.id);
+            }
             onJoinRoom(socket, connections, data);
         });
     
