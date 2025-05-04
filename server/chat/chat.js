@@ -35,7 +35,7 @@ function initWsConnection(io, connections, app, bot, users, messages, admins) {
         });
         
         socket.on('start', (data) => {
-            onStart(io, connections, data, users);
+            onStart(io, connections, data, users, admins, messages, socket.adminId);
         });
         
         socket.on('user-message', (data) => {
